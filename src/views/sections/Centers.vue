@@ -5,10 +5,17 @@
     >
       <v-data-table
         :headers="headers"
-        :items="desserts"
-        sort-by="calories"
+        :items="centers"
+        :loading="loadingCentersData"
+        :footer-props="{
+          'disable-items-per-page': true,
+          'items-per-page-text': 'Centros por página'
+        }"
+        sort-by="name"
+        :server-items-length="totalCentersItems"
         class="elevation-1"
-        @dblclick="show"
+        loading-text="Cargando Centros..."
+        @pagination="paginateCenters"
       >
         <template v-slot:top>
           <v-toolbar
@@ -50,7 +57,7 @@
                         md="4"
                       >
                         <v-text-field
-                          v-model="editedItem.name"
+                          v-model="editedItem.nombre_centro"
                           label="Nombre"
                         />
                       </v-col>
@@ -60,7 +67,7 @@
                         md="4"
                       >
                         <v-autocomplete
-                          v-model="editedItem.municipality"
+                          v-model="editedItem.municipio"
                           :items="municipalities"
                           color="white"
                           item-text="name"
@@ -73,7 +80,7 @@
                         md="4"
                       >
                         <v-text-field
-                          v-model="editedItem.organism"
+                          v-model="editedItem.organismo"
                           label="Organismo"
                         />
                       </v-col>
@@ -226,10 +233,10 @@
             mdi-hospital-building
           </v-icon>
           <v-card-title class="text-h5">
-            {{ editedItem.name }} / {{ editedItem.organism }}
+            {{ editedItem.nombre_centro }} / {{ editedItem.organismo }}
           </v-card-title>
         </v-card-title>
-        <v-card-subtitle>{{ editedItem.municipality }}</v-card-subtitle>
+        <v-card-subtitle>{{ editedItem.municipio }}</v-card-subtitle>
         <v-card-text>
           <info-box
             :stats="myStats"
@@ -240,8 +247,16 @@
             style="margin: 8px"
             :headers="areaHeaders"
             :items="areas"
-            sort-by="calories"
+            :loading="loadingAreasData"
+            :footer-props="{
+              'disable-items-per-page': true,
+              'items-per-page-text': 'Areas por página'
+            }"
+            sort-by="nombre"
+            :server-items-length="totalAreasItems"
             class="elevation-1"
+            loading-text="Cargando Areas..."
+            @pagination="paginateAreas"
           >
             <template v-slot:top>
               <v-toolbar
@@ -283,7 +298,7 @@
                             md="4"
                           >
                             <v-text-field
-                              v-model="editedAreaItem.name"
+                              v-model="editedAreaItem.nombre"
                               label="Nombre"
                             />
                           </v-col>
@@ -293,22 +308,11 @@
                             md="4"
                           >
                             <v-autocomplete
-                              v-model="editedAreaItem.category"
+                              v-model="editedAreaItem.categoria"
                               :items="categories"
                               color="white"
                               item-text="name"
                               label="Categoria"
-                            />
-                          </v-col>
-                          <v-col
-                            cols="12"
-                            sm="6"
-                            md="4"
-                          >
-                            <v-text-field
-                              v-model="editedAreaItem.capacity"
-                              label="Capacidad"
-                              type="number"
                             />
                           </v-col>
                         </v-row>
@@ -417,7 +421,7 @@
                 </template>
                 <span>Eliminar</span>
               </v-tooltip>
-              <v-tooltip bottom>
+              <!-- <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
                     color="info"
@@ -429,7 +433,7 @@
                   </v-icon>
                 </template>
                 <span>Detalles</span>
-              </v-tooltip>
+              </v-tooltip> -->
             </template>
             <template v-slot:no-data>
               <v-btn
@@ -462,18 +466,18 @@
             mdi-hospital-building
           </v-icon>
           <v-card-title class="text-h5">
-            {{ editedItem.name }} / {{ editedItem.organism }}
+            {{ editedItem.nombre_centro }} / {{ editedItem.organismo }}
           </v-card-title>
         </v-card-title>
-        <v-card-subtitle>{{ editedItem.municipality }}</v-card-subtitle>
+        <v-card-subtitle>{{ editedItem.municipio }}</v-card-subtitle>
         <v-card-text>
           <v-card>
             <v-card-title>
               <v-icon>
                 mdi-domain
-              </v-icon>{{ editedAreaItem.name }}
+              </v-icon>{{ editedAreaItem.nombre }}
             </v-card-title>
-            <v-card-subtitle>{{ editedAreaItem.category }}</v-card-subtitle>
+            <v-card-subtitle>{{ editedAreaItem.categoria }}</v-card-subtitle>
             <info-box
               style="margin: 4px"
               :stats="myAreaStats"
@@ -666,10 +670,24 @@
 </template>
 
 <script>
-  import InfoBox from '../../components/InfoBox.vue'
+  import InfoBox from '@/components/InfoBox.vue'
+  import { getCenters, getCenter, postCenter, putCenter, deleteCenter } from '@/axios/centers'
+  import { getAreas, getArea, postArea, putArea, deleteArea } from '@/axios/areas'
   export default {
     components: { InfoBox },
     data: () => ({
+      centersFilters: {
+        page: 1,
+      },
+      areasFilters: {
+        page: 1,
+      },
+      centersFirstLoad: true,
+      areasFirstLoadL: true,
+      loadingAreasData: true,
+      loadingCentersData: true,
+      totalCentersItems: 0,
+      totalAreasItems: 0,
       myStats: [
         {
           bgColor: 'success  ligthen-1',
@@ -768,16 +786,10 @@
           text: 'Nombre',
           align: 'start',
           sortable: true,
-          value: 'name',
+          value: 'nombre_centro',
         },
-        { text: 'Municipio', value: 'municipality' },
-        { text: 'Organismo', value: 'organism' },
-        /* { text: 'Capacidad positivos', value: 'cap_positivos' },
-        { text: 'Disponibilidad positivos', value: 'dis_positivos' },
-        { text: 'Capacidad sospechosos', value: 'cap_sospechosos' },
-        { text: 'Disponibilidad sospechosos', value: 'dis_sospechosos' },
-        { text: 'Capacidad contactos', value: 'cap_contactos' },
-        { text: 'Disponibilidad contactos', value: 'dis_contactos' }, */
+        { text: 'Municipio', value: 'municipio' },
+        { text: 'Organismo', value: 'organismo' },
         { text: 'Acciones', value: 'actions', sortable: false },
       ],
       areaHeaders: [
@@ -785,11 +797,9 @@
           text: 'Nombre',
           align: 'start',
           sortable: true,
-          value: 'name',
+          value: 'nombre',
         },
-        { text: 'Categoria', value: 'category' },
-        { text: 'Capacidad', value: 'capacity' },
-        { text: 'Disponibilidad', value: 'availability' },
+        { text: 'Categoria', value: 'categoria' },
         { text: 'Acciones', value: 'actions', sortable: false },
       ],
       roomsHeaders: [
@@ -802,35 +812,37 @@
         { text: 'Capacidad', value: 'capacity' },
         { text: 'Acciones', value: 'actions', sortable: false },
       ],
-      desserts: [],
+      centers: [],
       areas: [],
       rooms: [],
       editedIndex: -1,
       editedAreaIndex: -1,
       editedRoomIndex: -1,
       editedItem: {
-        name: '',
-        municipality: '',
-        organism: '',
+        nombre_centro: '',
+        municipio: '',
+        organismo: '',
         cap_total: 0,
         cap_disponible: 0,
+        id: -1,
       },
       defaultItem: {
-        name: '',
-        municipality: '',
-        organism: '',
+        nombre_centro: '',
+        municipio: '',
+        organismo: '',
         cap_total: 0,
         cap_disponible: 0,
+        id: -1,
       },
       editedAreaItem: {
-        name: '',
-        category: '',
+        nombre: '',
+        categoria: '',
         capacity: 0,
         availability: 0,
       },
       defaultAreaItem: {
-        name: '',
-        category: '',
+        nombre: '',
+        categoria: '',
         capacity: 0,
         availability: 0,
       },
@@ -877,14 +889,38 @@
       },
     },
 
-    created () {
+    async mounted () {
       this.initialize()
+      this.loadCentersData()
     },
 
     methods: {
+      async loadCentersData (page = 1) {
+        this.loadingCentersData = true
+        try {
+          const centersResponse = await getCenters(page)
+          this.totalCentersItems = centersResponse.data.meta.total
+          this.centers = centersResponse.data.centros
+          this.loadingCentersData = false
+        } catch (err) {
+          console.log(err)
+        }
+      },
+      async loadAreasData (page = 1) {
+        this.loadingAreasData = true
+        try {
+          const areasResponse = await getAreas(this.editedItem.id_centro, page)
+          this.totalAreasItems = areasResponse.data.meta.total
+          this.areas = areasResponse.data.areas
+          this.loadingAreasData = false
+        } catch (err) {
+          console.log(err)
+        }
+      },
       detailsItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.centers.indexOf(item)
         this.editedItem = Object.assign({}, item)
+        this.loadAreasData()
         this.init = false
         this.area = true
       },
@@ -893,10 +929,6 @@
         this.editedAreaItem = Object.assign({}, item)
         this.area = false
         this.room = true
-      },
-      show (item) {
-        console.log('Hello')
-        console.log(item)
       },
       closeDeleteU () {
         this.dialogDeleteUnavailable = false
@@ -908,11 +940,11 @@
         this.dialogRoomDeleteUnavailable = false
       },
       initialize () {
-        this.desserts = [
+        this.centers = [
           {
-            name: 'EIA',
-            municipality: 'Santa Clara',
-            organism: 'MINED',
+            nombre_centro: 'EIA',
+            municipio: 'Santa Clara',
+            organismo: 'MINED',
             cap_positivos: 100,
             cap_sospechosos: 67,
             cap_contactos: 67,
@@ -921,9 +953,9 @@
             dis_contactos: 50,
           },
           {
-            name: 'UCLV',
-            municipality: 'Santa Clara',
-            organism: 'MES',
+            nombre_centro: 'UCLV',
+            municipio: 'Santa Clara',
+            organismo: 'MES',
             cap_positivos: 100,
             cap_sospechosos: 67,
             cap_contactos: 67,
@@ -932,9 +964,9 @@
             dis_contactos: 50,
           },
           {
-            name: 'Pedagogico',
-            municipality: 'Santa Clara',
-            organism: 'MES',
+            nombre_centro: 'Pedagogico',
+            municipio: 'Santa Clara',
+            organismo: 'MES',
             cap_positivos: 100,
             cap_sospechosos: 67,
             cap_contactos: 67,
@@ -943,9 +975,9 @@
             dis_contactos: 50,
           },
           {
-            name: 'Perez Quintosa',
-            municipality: 'Santa Clara',
-            organism: 'MINED',
+            nombre_centro: 'Perez Quintosa',
+            municipio: 'Santa Clara',
+            organismo: 'MINED',
             cap_positivos: 100,
             cap_sospechosos: 67,
             cap_contactos: 67,
@@ -987,7 +1019,7 @@
       },
 
       editItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.centers.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
@@ -1003,7 +1035,7 @@
       },
 
       deleteItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.centers.indexOf(item)
         this.editedItem = Object.assign({}, item)
         if (this.editedItem.cap_disponible < this.editedItem.cap_total) {
           this.dialogDeleteUnavailable = true
@@ -1022,11 +1054,23 @@
         this.dialogRoomDelete = true
       },
 
-      deleteItemConfirm () {
-        this.desserts.splice(this.editedIndex, 1)
+      async deleteItemConfirm () {
+        try {
+          await deleteCenter(this.editedItem.id_centro)
+          this.loadCentersData()
+        } catch (err) {
+          console.log(err)
+        }
+        this.centers.splice(this.editedIndex, 1)
         this.closeDelete()
       },
-      deleteAreaItemConfirm () {
+      async deleteAreaItemConfirm () {
+        try {
+          await deleteArea(this.editedAreaItem.id_area)
+          this.loadAreasData()
+        } catch (err) {
+          console.log(err)
+        }
         this.areas.splice(this.editedAreaIndex, 1)
         this.closeAreaDelete()
       },
@@ -1079,19 +1123,28 @@
         })
       },
 
-      save () {
+      async save () {
         if (this.editedIndex > -1) {
-          Object.assign(this.desserts[this.editedIndex], this.editedItem)
+          await putCenter(this.editedItem)
+          this.loadCentersData()
+          // TODO: DELETE THIS !!
+          Object.assign(this.centers[this.editedIndex], this.editedItem)
         } else {
-          this.desserts.push(this.editedItem)
+          await postCenter(this.editedItem)
+          this.loadCentersData()
+          // TODO: DELETE THIS !!
+          this.centers.push(this.editedItem)
         }
         this.close()
       },
-      saveArea () {
-        console.log(this.editedAreaItem)
+      async saveArea () {
         if (this.editedAreaIndex > -1) {
+          await putArea(this.editedAreaItem)
+          this.loadAreasData()
           Object.assign(this.areas[this.editedAreaIndex], this.editedAreaItem)
         } else {
+          await postArea(this.editedItem.id_centro, this.editedAreaItem)
+          this.loadAreasData()
           this.areas.push(this.editedAreaItem)
         }
         this.closeArea()
@@ -1104,6 +1157,22 @@
           this.rooms.push(this.editedRoomItem)
         }
         this.closeRoom()
+      },
+      paginateCenters (pageInfo) {
+        if (this.centersFirstLoad) {
+          this.centersFirstLoad = false
+          return
+        }
+        this.centersFilters.page = pageInfo.page
+        this.loadCentersData(pageInfo.page)
+      },
+      paginateAreas (pageInfo) {
+        if (this.areasFirstLoad) {
+          this.areasFirstLoad = false
+          return
+        }
+        this.areasFilters.page = pageInfo.page
+        this.loadAreasData(pageInfo.page)
       },
     },
   }
