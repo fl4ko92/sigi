@@ -2,7 +2,7 @@
   <div style="margin: 8px">
     <info-box :stats="myStats" />
     <v-data-table
-    style="margin-top: 8px"
+      style="margin-top: 8px"
       :headers="headers"
       :items="patients"
       sort-by="ci"
@@ -17,6 +17,18 @@
             vertical
           />
           <v-spacer />
+          <!--  <router-link
+            :to="{name: Admit}"
+            style="margin : 4px"
+          >
+            <v-btn
+              color="success"
+              dark
+              class="mb-2"
+            >
+              <v-icon>mdi-notebook-check</v-icon>Ingresar Paciente(s)
+            </v-btn>
+          </router-link> -->
           <v-dialog
             v-model="dialog"
             max-width="800px"
@@ -38,6 +50,10 @@
               </v-card-title>
 
               <v-card-text>
+                <v-select
+                  :items="patientsStatus"
+                  label="Concepto por el que se registra"
+                />
                 <v-container>
                   <v-card style="margin-bottom: 4px">
                     <v-card-title>Datos Personales</v-card-title>
@@ -51,6 +67,7 @@
                           <v-text-field
                             v-model="editedItem.name"
                             label="Nombre"
+                            :rules="nameRules"
                           />
                         </v-col>
                         <v-col
@@ -61,6 +78,7 @@
                           <v-text-field
                             v-model="editedItem.lastname"
                             label="Apellidos"
+                            :rules="lastNameRules"
                           />
                         </v-col>
                         <v-col
@@ -71,6 +89,8 @@
                           <v-text-field
                             v-model="editedItem.ci"
                             label="Carné de Identidad"
+                            :counter="11"
+                            :rules="ciRules"
                           />
                         </v-col>
                         <v-col
@@ -81,6 +101,7 @@
                           <v-text-field
                             v-model="editedItem.age"
                             label="Edad"
+                            :rules="numberRules"
                           />
                         </v-col>
                         <v-col
@@ -99,7 +120,7 @@
                     </v-card-text>
                   </v-card>
                   <v-card>
-                    <v-card-title>Direccion</v-card-title>
+                    <v-card-title>Dirección</v-card-title>
                     <v-card-text>
                       <v-row>
                         <v-col
@@ -172,6 +193,7 @@
                           <v-autocomplete
                             v-model="editedItem.healthArea"
                             :items="healthAreas"
+                            :rules="healthAreaRules"
                             item-text="name"
                             label="Área de Salud"
                           />
@@ -184,6 +206,7 @@
                           <v-text-field
                             v-model="editedItem.cmf"
                             label="C.M.F."
+                            :rules="cmfRules"
                           />
                         </v-col>
                         <v-col
@@ -212,6 +235,7 @@
                         >
                           <v-text-field
                             v-model="editedItem.remissionCenter.name"
+                            :disabled="disableRemissionCenterName"
                             label="Nombre"
                           />
                         </v-col>
@@ -399,12 +423,12 @@
                         </v-col>
                         <v-col
                           cols="12"
-                          sm="6"
-                          md="4"
+                          sm="12"
+                          md="12"
                         >
                           <v-text-field
                             v-model="editedItem.othersSynptoms"
-                            :disabled="othersS && editedItem.asyn"
+                            :disabled="othersS"
                             label="Otros Síntomas"
                           />
                         </v-col>
@@ -418,6 +442,20 @@
                     <v-card-title>Antecedentes Patológicos Personales</v-card-title>
                     <v-card-text>
                       <v-row>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          md="4"
+                        >
+                          <v-checkbox
+                            v-model="editedItem.noReferApp"
+                            label="No refiere"
+                          />
+                        </v-col>
+                      </v-row>
+                      <v-row
+                        v-if="!editedItem.noReferApp"
+                      >
                         <v-col
                           cols="12"
                           sm="6"
@@ -508,8 +546,8 @@
                         </v-col>
                         <v-col
                           cols="12"
-                          sm="6"
-                          md="4"
+                          sm="12"
+                          md="12"
                         >
                           <v-text-field
                             v-model="editedItem.othersApp"
@@ -530,7 +568,7 @@
                         <v-col
                           cols="12"
                           sm="6"
-                          md="4"
+                          md="6"
                         >
                           <v-checkbox
                             v-model="editedItem.contactWithPositive.isContact"
@@ -540,18 +578,7 @@
                         <v-col
                           cols="12"
                           sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            v-model="editedItem.contactWithPositive.placeOfContact"
-                            :disabled="!editedItem.contactWithPositive.isContact"
-                            label="Lugar y Tipo de Contacto"
-                          />
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
+                          md="6"
                         >
                           <v-menu
                             ref="menu2"
@@ -598,6 +625,59 @@
                             </v-date-picker>
                           </v-menu>
                         </v-col>
+                        <v-col
+                          cols="12"
+                        >
+                          <v-text-field
+                            v-model="editedItem.contactWithPositive.placeOfContact"
+                            :disabled="!editedItem.contactWithPositive.isContact"
+                            label="Lugar y Tipo de Contacto"
+                          />
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
+                  <v-card
+                    style="margin-top: 4px"
+                    fluid
+                  >
+                    <v-card-title>Arribado</v-card-title>
+                    <v-card-text>
+                      <v-row>
+                        <v-col
+                          cols="12"
+                          sm="8"
+                          md="8"
+                        >
+                          <v-checkbox
+                            v-model="editedItem.arribado"
+                            label="¿Ha arribado del extranjero en los últimos 15 días?"
+                          />
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          md="4"
+                        >
+                          <v-autocomplete
+                            v-model="editedItem.arrivalData.countryOfArrival"
+                            :disabled="!editedItem.arribado"
+                            :items="countries"
+                            item-text="name"
+                            label="País de procedencia"
+                          />
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          sm="12"
+                          md="12"
+                        >
+                          <v-text-field
+                            v-model="editedItem.arrivalData.residencePlace"
+                            :disabled="!editedItem.arribado"
+                            label="Lugar de Residencia"
+                          />
+                        </v-col>
                       </v-row>
                     </v-card-text>
                   </v-card>
@@ -625,6 +705,7 @@
                         >
                           <v-checkbox
                             v-model="editedItem.app"
+                            :disabled="disablePregnant"
                             label="Embarazada"
                             value="pregnant"
                           />
@@ -636,11 +717,12 @@
                         >
                           <v-checkbox
                             v-model="editedItem.app"
+                            :disabled="disableChild"
                             label="Niño"
                             value="child"
                           />
                         </v-col>
-                        <v-col
+                        <!-- <v-col
                           cols="12"
                           sm="6"
                           md="4"
@@ -663,7 +745,7 @@
                             item-text="name"
                             label="Centro de Aislamiento"
                           />
-                        </v-col>
+                        </v-col> -->
                       </v-row>
                     </v-card-text>
                   </v-card>
@@ -835,13 +917,42 @@
 
 <script>
   import InfoBox from '../../components/InfoBox.vue'
+  import { isLastName, isId, isPositiveNumber, isCmf } from '@/utils/regex'
   export default {
     components: { InfoBox },
     data: () => ({
+      healthAreaRules: [
+        v => !!v || 'El área de salud es requerida',
+      ],
+      cmfRules: [
+        v => isCmf(v) || 'El área de salud es requerida',
+      ],
+      numberRules: [
+        v => isPositiveNumber(v) || 'Debe chequear la edad',
+      ],
+      ciRules: [
+        v => !!v || 'El Carné es requerido',
+        v => isId(v) || 'Debe chequear el carné',
+      ],
+      nameRules: [
+        v => !!v || 'El nombre es requerido',
+        v => isLastName(v) || 'Debe chequear el nombre',
+      ],
+      lastNameRules: [
+        v => !!v || 'Los apellidos son requeridos',
+        v => isLastName(v) || 'Debe chequear el nombre',
+      ],
+      patientsStatus: ['Sospechoso', 'Positivo', 'Contacto'],
       date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       menu: false,
       modal: false,
       menu2: false,
+      countries: [
+        { name: 'Cuba' },
+        { name: 'Rusia' },
+        { name: 'España' },
+        { name: 'EE.UU.' },
+      ],
       myStats: [
         {
           bgColor: 'red  lighten-1',
@@ -918,7 +1029,7 @@
       dialogDelete: false,
       centerTypes: [
         { name: 'Policlínico' },
-        { name: 'CM' },
+        { name: 'C.M.F' },
         { name: 'Hospital' },
         { name: 'Otro' },
       ],
@@ -967,37 +1078,39 @@
       patients: [],
       editedIndex: -1,
       editedItem: {
-        name: '',
-        lastname: '',
+        nombre: '',
+        apellidos: '',
         ci: '',
-        age: 0,
-        sex: '',
-        address: {
+        edad: 0,
+        sexo: '',
+        direccion: {
           calle: '',
-          number: '',
-          between: '',
-          municipality: '',
-          province: '',
+          numero: '',
+          entrecalles: '',
+          municipio: '',
+          provincia: '',
         },
         cmf: '',
-        healthArea: '',
-        remissionCenter: {
-          type: '',
-          name: '',
+        area_salud: '',
+        remite_caso: {
+          tipo: '',
+          nombre: '',
         },
-        fis: '',
-        synptoms: [],
+        fecha_sintomas: '',
+        sintomas: [],
         app: [],
-        contactWithPositive: {
-          isContact: false,
-          placeOfContact: '',
-          dateOfContact: null,
+        contacto_positivo: {
+          es_contacto: false,
+          lugar_contacto: '',
+          fecha_contacto: null,
         },
-        status: '',
-        isolationCenter: '',
-        healthWorker: false,
-        others: '',
-        asyn: false,
+        estado_sistema: '',
+        trabajador_salud: false,
+        arribado: false,
+        datos_arribo: {
+          pais: '',
+          residencia: '',
+        },
       },
       defaultItem: {
         name: '',
@@ -1031,6 +1144,12 @@
         healthWorker: false,
         others: '',
         asyn: false,
+        noReferApp: false,
+        arribado: false,
+        arrivalData: {
+          countryOfArrival: '',
+          residencePlace: '',
+        },
       },
     }),
 
@@ -1043,6 +1162,15 @@
       },
       othersApp () {
         return this.editedItem.app.indexOf('others') === -1
+      },
+      disablePregnant () {
+        return this.editedItem.app.indexOf('child') !== -1
+      },
+      disableChild () {
+        return this.editedItem.app.indexOf('pregnant') !== -1
+      },
+      disableRemissionCenterName () {
+        return (this.editedItem.remissionCenter.type !== 'Hospital') && (this.editedItem.remissionCenter.type !== 'Otro')
       },
     },
 
