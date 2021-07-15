@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0e9d07"],{"8eae":function(e,t,n){"use strict";n.r(t);var a,o,s=n("0dfe"),i=n("6512"),u={name:"About",metaInfo:{title:"Centros de Aislamiento"},extends:s["a"],mixins:[Object(i["a"])(["centers"])],props:{id:{type:String,default:"about"}}},d=u,l=n("2877"),p=Object(l["a"])(d,a,o,!1,null,null,null);t["default"]=p.exports}}]);
+//# sourceMappingURL=chunk-2d0e9d07.8536f31d.js.map
