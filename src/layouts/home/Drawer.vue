@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer
-
+    v-model="drawer"
     color="transparent"
     app
     height="auto"
@@ -51,5 +51,10 @@
     data: () => ({
       iconsrc: '@/assets/icon.png',
     }),
+    computed: {
+      drawer () {
+        return this.$store.getters.drawer
+      },
+    },
   }
 </script>
