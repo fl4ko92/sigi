@@ -1,6 +1,8 @@
 // Imports
 import Vue from 'vue'
 import Router from 'vue-router'
+import Vuelidate from 'vuelidate'
+Vue.use(Vuelidate)
 
 Vue.use(Router)
 
