@@ -1,9 +1,8 @@
 <template>
   <v-navigation-drawer
     v-model="drawer"
-    color="transparent"
     app
-    height="auto"
+    height="100%"
     overlay-color="secondary"
     overlay-opacity=".8"
     v-on="$listeners"

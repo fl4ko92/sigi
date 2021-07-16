@@ -2,11 +2,20 @@
   <div style="margin: 8px">
     <info-box :stats="myStats" />
     <v-data-table
+      locale="es-es"
       style="margin-top: 8px"
       :headers="headers"
       :items="patients"
       sort-by="ci"
+      :loading="loadingPatientsData"
+      :footer-props="{
+        'disable-items-per-page': true,
+        'items-per-page-text': 'Pacientes por página'
+      }"
+      :server-items-length="totalPatientsItems"
+      loading-text="Cargando Pacientes"
       class="elevation-1"
+      @pagination="paginatePatients"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -989,6 +998,11 @@
   export default {
     components: { InfoBox, PatientFile },
     data: () => ({
+      patientsFilters: {
+        page: 1,
+      },
+      patientsFirstLoad: true,
+      totalPatientsItems: 0,
       infoPatient: false,
       toDeleteId: -1,
       loadingPatientsData: false,
@@ -2851,6 +2865,14 @@
         this.editedIndex = this.patients.indexOf(item)
         this.dialog = true
         this.loadingPatientsData = false
+      },
+      paginatePatients (pageInfo) {
+        if (this.patientsFirstLoad) {
+          this.patientsFirstLoad = false
+          return
+        }
+        this.patientsFilters.page = pageInfo.page
+        this.loadPatientsData(pageInfo.page)
       },
 
       deleteItem (item) {

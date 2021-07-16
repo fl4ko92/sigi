@@ -187,41 +187,7 @@ export default [
           last_page: 2,
           per_page: 10,
           to: 10,
-          total: 4,
-        },
-      }),
-    )
-  }),
-  rest.get(REQUEST_DIR + 'pacientes?page=1', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        pacientes: [
-          {
-            id_paciente: '1',
-            ci: 92121234063,
-            nombre: 'Pepe',
-            apellidos: 'Glez Hdez',
-          },
-          {
-            id_paciente: '1',
-            ci: 92121234063,
-            nombre: 'Pepe',
-            apellidos: 'Glez Hdez',
-          },
-          {
-            id_paciente: '1',
-            ci: 92121234063,
-            nombre: 'Pepe',
-            apellidos: 'Glez Hdez',
-          },
-        ],
-        meta: {
-          current_page: 1,
-          from: 1,
-          last_page: 2,
-          per_page: 10,
-          to: 10,
-          total: 4,
+          total: 20,
         },
       }),
     )
