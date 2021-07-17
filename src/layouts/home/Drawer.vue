@@ -1,8 +1,9 @@
 <template>
   <v-navigation-drawer
-    v-model="drawer"
+
+    color="transparent"
     app
-    height="100%"
+    height="auto"
     overlay-color="secondary"
     overlay-opacity=".8"
     v-on="$listeners"
@@ -50,10 +51,5 @@
     data: () => ({
       iconsrc: '@/assets/icon.png',
     }),
-    computed: {
-      drawer () {
-        return this.$store.getters.drawer
-      },
-    },
   }
 </script>

@@ -19,6 +19,7 @@
     components: {
       HomeAppBar: () => import('@/layouts/home/AppBar'),
       HomeFooter: () => import('@/layouts/home/Footer'),
+      HomeSettings: () => import('@/layouts/home/Settings'),
       HomeView: () => import('@/layouts/home/View'),
       HomeDrawer: () => import('@/layouts/home/Drawer'),
     },
@@ -28,6 +29,7 @@
         'Control',
         'Centros',
         'Pacientes',
+        'Directores',
       ],
     }),
   }
