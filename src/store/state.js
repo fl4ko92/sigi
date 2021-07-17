@@ -1,3 +1,3 @@
 export default {
-  drawer: false,
+  drawer: true,
 }

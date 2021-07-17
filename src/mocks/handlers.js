@@ -410,9 +410,26 @@ export default [
   rest.delete(REQUEST_DIR + 'pacientes/1', (req, res, ctx) => {
     return res(
       ctx.json({
-
         message: 'Success',
       }),
     )
   }),
+  rest.get(REQUEST_DIR + 'nomenclador/antigeno', (req, res, ctx) =>
+    res(
+      ctx.json([
+        {
+          id: 1,
+          nombre: 'Positivo',
+        },
+        {
+          id: 2,
+          nombre: 'Negativo',
+        },
+        {
+          id: 3,
+          nombre: 'No realizado',
+        },
+      ]),
+    ),
+  ),
 ]

@@ -3,8 +3,7 @@
     <v-row no-gutters>
       <v-col
         cols="12"
-        sm="6"
-        md="2"
+        sm="2"
       >
         <v-avatar
           size="100"
@@ -20,7 +19,7 @@
       </v-col>
       <v-col
         cols="12"
-        sm="5"
+        sm="8"
         md="10"
       >
         <v-row no-gutters>
@@ -43,112 +42,112 @@
           <v-col
             cols="12"
             sm="5"
-            md="1"
+            md="2"
           >
             <v-icon sty>
               mdi-card-account-details
-            </v-icon>
+            </v-icon> CI:
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="11"
+            md="10"
           >
             {{ patient.ci }}
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="1"
+            md="2"
           >
             <v-icon sty>
               mdi-timer-sand-full
-            </v-icon>
+            </v-icon> Edad:
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="11"
+            md="10"
           >
             {{ patient.edad }} años
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="1"
+            md="2"
           >
             <v-icon sty>
               mdi-gender-male-female
-            </v-icon>
+            </v-icon> Sexo:
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="11"
+            md="10"
           >
             {{ patient.sexo }}
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="1"
+            md="2"
           >
             <v-icon sty>
               mdi-map-marker
-            </v-icon>
+            </v-icon> Dirección:
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="11"
+            md="10"
           >
             {{ patient.direccion }} => {{ patient.provincia }}  / {{ patient.municipio }}
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="1"
+            md="2"
           >
             <v-icon sty>
               mdi-hospital-building
-            </v-icon>
+            </v-icon> A.S.:
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="11"
+            md="10"
           >
             {{ patient.area_salud }}
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="1"
+            md="2"
           >
             <v-icon sty>
               mdi-domain
-            </v-icon>
+            </v-icon> C.M.F.
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="11"
+            md="10"
           >
             {{ patient.cmf }}
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="1"
+            md="2"
           >
             <v-icon sty>
               mdi-directions
-            </v-icon>
+            </v-icon> Remite:
           </v-col>
           <v-col
             cols="12"
             sm="5"
-            md="11"
+            md="10"
           >
             {{ patient.remite_caso }}
           </v-col>
@@ -273,13 +272,14 @@
             </v-card>
           </v-col>
           <v-col
+            v-if="contact"
             cols="12"
           >
             <v-card style="margin-top: 4px">
               <v-card-subtitle>
                 <b>Contacto</b>
               </v-card-subtitle>
-              <v-card-text v-if="contact">
+              <v-card-text>
                 <span
                   v-if="patient.fecha_contacto"
                   style="margin: 4px"
@@ -292,9 +292,6 @@
                   v-if="patient.tipo_contacto"
                   style="margin: 4px"
                 >{{ patient.tipo_contacto }}</span>
-              </v-card-text>
-              <v-card-text v-else>
-                <span>No refiere contacto con positivo</span>
               </v-card-text>
             </v-card>
           </v-col>
@@ -346,6 +343,7 @@
       >
         OK
       </v-btn>
+      <v-spacer />
     </v-card-actions>
   </v-card>
 </template>

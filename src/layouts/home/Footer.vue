@@ -1,8 +1,6 @@
 <template>
   <v-footer
     id="home-footer"
-    color="grey darken-4"
-    dark
     min-height="72"
   >
     <v-container>

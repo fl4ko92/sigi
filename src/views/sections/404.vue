@@ -16,9 +16,11 @@
     />
 
     <div class="text-center">
-      <base-btn :to="{ name: 'Home' }">
-        Sácame de aquí
-      </base-btn>
+      <router-link :to="{name: 'Control'}">
+        <base-btn>
+          Sácame de aquí
+        </base-btn>
+      </router-link>
     </div>
   </base-section>
 </template>

@@ -25,7 +25,7 @@
                       :src="require('@/assets/icon.png')"
                       alt="SIGI"
                     >
-                  </v-avatar>Inicio de sesión
+                  </v-avatar>SIGI / Inicio de sesión
                 </v-toolbar-title>
               </v-toolbar>
               <v-card-text>
