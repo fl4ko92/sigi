@@ -1,5 +1,5 @@
-import axios from "axios";
+import axios from 'axios'
 
 export default axios.create({
-  baseURL: 'http://sigi.uclv.cu/api/'
-});
+  baseURL: 'https://sigi.uclv.cu/api/',
+})

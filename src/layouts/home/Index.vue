@@ -29,7 +29,6 @@
         'Control',
         'Centros',
         'Pacientes',
-        'Directores',
       ],
     }),
   }
