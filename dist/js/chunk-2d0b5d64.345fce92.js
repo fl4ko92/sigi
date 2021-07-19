@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0b5d64"],{"1b30":function(n,e,t){"use strict";t.r(e);var a,o,u=t("0dfe"),d=t("6512"),i={name:"FourOhFour",metaInfo:{title:"Oops! Pagina no encontrada!"},extends:u["a"],mixins:[Object(d["a"])(["404"])],props:{id:{type:String,default:"about"}}},p=i,s=t("2877"),l=Object(s["a"])(p,a,o,!1,null,null,null);e["default"]=l.exports}}]);
+//# sourceMappingURL=chunk-2d0b5d64.345fce92.js.map
