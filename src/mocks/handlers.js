@@ -1,4 +1,4 @@
-/* import { rest } from 'msw'
+import { rest } from 'msw'
 import { REQUEST_DIR } from '../utils/constants'
 
 export default [
@@ -431,4 +431,3 @@ export default [
     ),
   ),
 ]
- */

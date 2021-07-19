@@ -1,6 +1,5 @@
 <template>
   <div style="margin: 8px">
-    <info-box :stats="myStats" />
     <v-data-table
       locale="es-es"
       style="margin-top: 8px"
@@ -227,9 +226,10 @@
                             sm="6"
                             md="4"
                           >
-                            <v-text-field
+                            <v-combobox
                               v-model="editedItem.remite_caso"
-                              label="Centro que remite el caso"
+                              :items="remissionTypes"
+                              label="Remite el Caso"
                             />
                           </v-col>
                         <!-- <v-col
@@ -994,6 +994,7 @@
   export default {
     components: { InfoBox, PatientFile },
     data: () => ({
+      remissionTypes: ['Policlínico', 'C.M.F.', 'Hospital'],
       antigensData: [],
       systemStatusesData: [],
       patientsFilters: {
@@ -1033,108 +1034,20 @@
         v => !!v || 'Este campo es requerido',
         v => isLastName(v) || 'Debe chequear el nombre',
       ],
-      date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       menu: false,
       modal: false,
       menu2: false,
       menu3: false,
-
-      myStats: [
-        {
-          bgColor: 'red  lighten-1',
-          iconClass: 'grey white--text',
-          icon: 'mdi-account-alert',
-          title: 'Pacientes Registrados',
-          data: '150',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'orange lighten-2',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-search',
-          title: 'Pacientes Sospechosos',
-          data: '78',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'pink  darken-1',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-plus',
-          title: 'Pacientes Positivos',
-          data: '72',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'pink  darken-1',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-plus',
-          title: 'Sospechosos Pendientes a Ingreso',
-          data: '25',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'pink  darken-1',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-plus',
-          title: 'Positivos Pendientes a Ingreso',
-          data: '15',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-      ],
-      statuses: [
-        { nombre: 'Ingresado' },
-        { nombre: 'En transporte' },
-        { nombre: 'Pendiente' },
-        { nombre: 'En IRA del AS' },
-      ],
-      isolationCenters: [
-        { nombre: 'Perez Quintosa' },
-        { nombre: 'Pedagogico' },
-        { nombre: 'Hospital Militar' },
-        { nombre: 'Minerva' },
-        { nombre: 'UCLV' },
-        { nombre: 'Politecnico de la Salud' },
-      ],
       dialogDeleteUnavailable: false,
       dialog: false,
       dialogDelete: false,
-      centerTypes: [
-        { nombre: 'Policlínico' },
-        { nombre: 'C.M.F' },
-        { nombre: 'Hospital' },
-        { nombre: 'Otro' },
-      ],
-      testVariants: [
-        { nombre: 'Positivo', id: 1 },
-        { nombre: 'Negativo', id: 0 },
-        { nombre: 'No realizado', id: 2 },
-      ],
       healthAreas: [],
       sexes: [
         { nombre: 'Masculino', id: 'M' }, { nombre: 'Femenino', id: 'F' },
       ],
       provinces: [],
       municipalities: [],
-      categories: [
-        { id: 1, nombre: 'SOSPECHOSO' },
-        { id: 2, nombre: 'CONTACTO' },
-        { id: 3, nombre: 'POSITIVO' },
-      ],
+      categories: [],
       headers: [
         {
           text: 'CI',

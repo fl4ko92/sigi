@@ -11,6 +11,11 @@ import axios from 'axios'
 
 Vue.use(Vuex)
 
+/* if (process.env.NODE_ENV === 'development') {
+  const { worker } = require('./mocks/browser')
+  worker.start()
+} */
+
 Vue.use(Toast, {
   transition: 'Vue-Toastification__bounce',
   maxToasts: 20,
