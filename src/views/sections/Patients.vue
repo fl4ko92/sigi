@@ -73,6 +73,7 @@
                     v-model="editedItem.categoria"
                     :items="categories"
                     item-text="nombre"
+                    :rules="healthAreaRules"
                     item-value="id"
                     label="Categoría"
                   />
@@ -966,12 +967,7 @@
         </v-tooltip> -->
       </template>
       <template v-slot:no-data>
-        <v-btn
-          color="primary"
-          @click="initialize"
-        >
-          Reset
-        </v-btn>
+        No hay datos disponibles
       </template>
     </v-data-table>
     <v-dialog
@@ -1022,6 +1018,7 @@
         v => isCmf(v) || 'Este campo es requerido',
       ],
       numberRules: [
+        v => !!v || 'Este campo es requerido',
         v => isPositiveNumber(v) || 'Debe chequear la edad',
       ],
       ciRules: [
@@ -1283,7 +1280,7 @@
     },
 
     created () {
-      this.initialize()
+      this.loadPatientsData()
       // this.getCategoriesData()
       this.getSystemStatusData()
       this.getHealthStatusData()
@@ -1448,40 +1445,48 @@
         try {
           const patientResponse = await getPatient(item.id_paciente)
           this.editedItem = Object.assign({}, patientResponse.data.paciente)
-          this.editedItem.hipertension = this.editedItem.apps.hipertension
-          this.editedItem.diabetes = this.editedItem.apps.diabetes
-          this.editedItem.asma = this.editedItem.apps.asma
-          this.editedItem.obesidad = this.editedItem.apps.obesidad
-          this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
-          this.editedItem.oncologia = this.editedItem.apps.oncologia
-          this.editedItem.otros_apps = this.editedItem.apps.otros
-          if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
-            this.noApp = false
+          if (this.editedItem.apps !== null) {
+            this.editedItem.hipertension = this.editedItem.apps.hipertension
+            this.editedItem.diabetes = this.editedItem.apps.diabetes
+            this.editedItem.asma = this.editedItem.apps.asma
+            this.editedItem.obesidad = this.editedItem.apps.obesidad
+            this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
+            this.editedItem.oncologia = this.editedItem.apps.oncologia
+            this.editedItem.otros_apps = this.editedItem.apps.otros
+            if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
+              this.noApp = false
+            }
           }
-          this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
-          this.editedItem.fiebre = this.editedItem.sintomas.fiebre
-          this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
-          this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
-          this.editedItem.tos = this.editedItem.sintomas.tos
-          this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
-          this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
-          this.editedItem.cefalea = this.editedItem.sintomas.cefalea
-          this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
-          this.editedItem.otros_sint = this.editedItem.sintomas.otros
-          if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
-            this.asymptomatic = false
+          if (this.editeditem.sintomas !== null) {
+            this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
+            this.editedItem.fiebre = this.editedItem.sintomas.fiebre
+            this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
+            this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
+            this.editedItem.tos = this.editedItem.sintomas.tos
+            this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
+            this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
+            this.editedItem.cefalea = this.editedItem.sintomas.cefalea
+            this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
+            this.editedItem.otros_sint = this.editedItem.sintomas.otros
+            if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
+              this.asymptomatic = false
+            }
           }
-          this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
-          this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
-          this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
-          if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
-            this.isContact = true
+          if (this.editedItem.contacto !== null) {
+            this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
+            this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
+            this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
+            if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
+              this.isContact = true
+            }
           }
-          this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
-          this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
-          this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
-          if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
-            this.arrived = true
+          if (this.editedItem.arribo !== null) {
+            this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
+            this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
+            this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
+            if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
+              this.arrived = true
+            }
           }
           this.loadingPatientsData = false
           this.infoPatient = true
@@ -1529,49 +1534,54 @@
           })
         }
       },
-      initialize () {
-        this.loadPatientsData()
-      },
 
       async editItem (item) {
         this.loadingPatientsData = true
         try {
           const patientResponse = await getPatient(item.id_paciente)
           this.editedItem = Object.assign({}, patientResponse.data.paciente)
-          this.editedItem.hipertension = this.editedItem.apps.hipertension
-          this.editedItem.diabetes = this.editedItem.apps.diabetes
-          this.editedItem.asma = this.editedItem.apps.asma
-          this.editedItem.obesidad = this.editedItem.apps.obesidad
-          this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
-          this.editedItem.oncologia = this.editedItem.apps.oncologia
-          this.editedItem.otros_apps = this.editedItem.apps.otros
-          if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
-            this.noApp = false
+          if (this.editedItem.apps !== null) {
+            this.editedItem.hipertension = this.editedItem.apps.hipertension
+            this.editedItem.diabetes = this.editedItem.apps.diabetes
+            this.editedItem.asma = this.editedItem.apps.asma
+            this.editedItem.obesidad = this.editedItem.apps.obesidad
+            this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
+            this.editedItem.oncologia = this.editedItem.apps.oncologia
+            this.editedItem.otros_apps = this.editedItem.apps.otros
+            if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
+              this.noApp = false
+            }
           }
-          this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
-          this.editedItem.fiebre = this.editedItem.sintomas.fiebre
-          this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
-          this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
-          this.editedItem.tos = this.editedItem.sintomas.tos
-          this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
-          this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
-          this.editedItem.cefalea = this.editedItem.sintomas.cefalea
-          this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
-          this.editedItem.otros_sint = this.editedItem.sintomas.otros
-          if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
-            this.asymptomatic = false
+          if (this.editedItem.sintomas !== null) {
+            this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
+            this.editedItem.fiebre = this.editedItem.sintomas.fiebre
+            this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
+            this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
+            this.editedItem.tos = this.editedItem.sintomas.tos
+            this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
+            this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
+            this.editedItem.cefalea = this.editedItem.sintomas.cefalea
+            this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
+            this.editedItem.otros_sint = this.editedItem.sintomas.otros
+            if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
+              this.asymptomatic = false
+            }
           }
-          this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
-          this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
-          this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
-          if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
-            this.isContact = true
+          if (this.editedItem.contacto !== null) {
+            this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
+            this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
+            this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
+            if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
+              this.isContact = true
+            }
           }
-          this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
-          this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
-          this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
-          if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
-            this.arrived = true
+          if (this.editedItem.arribo !== null) {
+            this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
+            this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
+            this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
+            if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
+              this.arrived = true
+            }
           }
         } catch (e) {
           this.$toast.error(e.toString(), {
@@ -1662,6 +1672,7 @@
               await putPatient(this.editedItem)
               this.clearData()
               this.loadPatientsData()
+              this.close()
             } catch (e) {
               console.log(e)
               this.$toast.error(e.toString(), {
@@ -1685,6 +1696,7 @@
               await postPatient(this.editedItem)
               this.clearData()
               this.loadPatientsData()
+              this.close()
             } catch (e) {
               console.log(e)
               this.$toast.error(e.toString(), {
@@ -1703,7 +1715,6 @@
               })
             }
           }
-          this.close()
         } else {
           this.$toast.error('Chequee los datos incorrectos', {
             position: 'bottom-center',

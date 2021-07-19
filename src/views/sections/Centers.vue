@@ -421,7 +421,7 @@
                 </template>
                 <span>Eliminar</span>
               </v-tooltip>
-              <!-- <v-tooltip bottom>
+              <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
                     color="info"
@@ -433,7 +433,7 @@
                   </v-icon>
                 </template>
                 <span>Detalles</span>
-              </v-tooltip> -->
+              </v-tooltip>
             </template>
             <template v-slot:no-data>
               <v-btn
