@@ -17,7 +17,6 @@ export async function getPatient (id) {
 
 export async function postPatient (data) {
   const url = `${REQUEST_DIR}pacientes`
-  data = queryString.stringify(data)
   const response = await axios.post(url, data, requestDataFormUrlEncoded())
   return response
 }
@@ -30,7 +29,6 @@ export async function deletePatient (id) {
 
 export async function putPatient (data) {
   const url = `${REQUEST_DIR}pacientes/${data.id_paciente}`
-  data = queryString.stringify(data)
   const response = await axios.put(url, data, requestDataFormUrlEncoded())
   return response
 }

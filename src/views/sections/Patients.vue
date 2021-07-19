@@ -69,14 +69,12 @@
                 lazy-validation
               >
                 <v-card-text>
-                  <v-select
-                    :v-model="editedItem.categoria"
+                  <v-autocomplete
+                    v-model="editedItem.categoria"
                     :items="categories"
                     item-text="nombre"
                     item-value="id"
-                    :rules="healthAreaRules"
-                    no-data-text="No se pudo conectar con el servidor"
-                    label="Concepto por el que se registra"
+                    label="Categoría"
                   />
                   <v-container>
                     <v-card style="margin-bottom: 4px">
@@ -134,10 +132,11 @@
                             md="4"
                           >
                             <v-autocomplete
-                              v-model="editedItem.sex"
+                              v-model="editedItem.sexo"
                               :items="sexes"
                               item-text="nombre"
                               item-value="id"
+                              :rules="healthAreaRules"
                               label="Sexo"
                             />
                           </v-col>
@@ -154,28 +153,9 @@
                             <v-text-field
                               v-model="editedItem.direccion"
                               label="Dirección"
+                              :rules="healthAreaRules"
                             />
                           </v-col>
-                          <!-- <v-col
-                          cols="12"
-                          sm="6"
-                          md="2"
-                        >
-                          <v-text-field
-                            v-model="editedItem.address.number"
-                            label="Número"
-                          />
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="6"
-                        >
-                          <v-text-field
-                            v-model="editedItem.address.between"
-                            label="Entrecalles"
-                          />
-                        </v-col> -->
                           <v-col
                             cols="12"
                             sm="6"
@@ -187,8 +167,9 @@
                               item-text="nombre"
                               no-data-text="No se pudo conectar con el servidor"
                               item-value="id"
+                              :rules="healthAreaRules"
                               label="Provincia"
-                              @input="loadMunicipalitiesData(item.id)"
+                              @change="loadMunicipalitiesData(editedItem.provincia)"
                             />
                           </v-col>
                           <v-col
@@ -202,7 +183,9 @@
                               no-data-text="Debe seleccionar una provincia"
                               item-text="nombre"
                               item-value="id"
+                              :rules="healthAreaRules"
                               label="Municipio"
+                              @change="getHealthAreaData(editedItem.municipio)"
                             />
                           </v-col>
                         </v-row>
@@ -225,6 +208,7 @@
                               item-text="nombre"
                               item-value="id"
                               label="Área de Salud"
+                              no-data-text="Debe seleccionar un municipio"
                             />
                           </v-col>
                           <v-col
@@ -347,7 +331,7 @@
                             md="4"
                           >
                             <v-checkbox
-                              v-model="editedItem.sintomas.rinorrea"
+                              v-model="editedItem.rinorrea"
                               label="Rinorrea"
                             />
                           </v-col>
@@ -676,7 +660,7 @@
                             md="12"
                           >
                             <v-text-field
-                              v-model="editedItem.lugar_residencia"
+                              v-model="editedItem.lugar_estancia"
                               :disabled="!arrived"
                               label="Lugar de Residencia"
                             />
@@ -821,6 +805,13 @@
 
               <v-card-actions>
                 <v-spacer />
+                <v-btn
+                  color="blue darken-1"
+                  text
+                  @click="showMeData"
+                >
+                  Cancelar
+                </v-btn>
                 <v-btn
                   color="blue darken-1"
                   text
@@ -1138,12 +1129,15 @@
       ],
       healthAreas: [],
       sexes: [
-        { nombre: 'Masculino' },
-        { nombre: 'Femenino' },
+        { nombre: 'Masculino', id: 'M' }, { nombre: 'Femenino', id: 'F' },
       ],
       provinces: [],
       municipalities: [],
-      categories: [],
+      categories: [
+        { id: 1, nombre: 'SOSPECHOSO' },
+        { id: 2, nombre: 'CONTACTO' },
+        { id: 3, nombre: 'POSITIVO' },
+      ],
       headers: [
         {
           text: 'CI',
@@ -1174,7 +1168,6 @@
         ninho: false,
         embarazada: false,
         vacunado: false,
-        categoria: null,
         test_antigeno: 2,
         sintomas: [],
         app: [],
@@ -1227,7 +1220,6 @@
         ninho: false,
         embarazada: false,
         vacunado: false,
-        categoria: null,
         test_antigeno: 2,
 
         // eslint-disable-next-line camelcase
@@ -1292,7 +1284,7 @@
 
     created () {
       this.initialize()
-      this.getCategoriesData()
+      // this.getCategoriesData()
       this.getSystemStatusData()
       this.getHealthStatusData()
       this.getProvincesData()
@@ -1300,47 +1292,156 @@
     },
 
     methods: {
+      showMeData () {
+        console.log(this.editedItem)
+      },
+      async loadMunicipalitiesData (id) {
+        console.log('Hello world!!')
+        try {
+          const municipalitiesRes = await getMunicipalities(id)
+          this.municipalities = municipalitiesRes.data
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
+      },
       async getCategoriesData () {
         try {
           const categoriesResponse = await getCategories()
           this.categories = categoriesResponse.data
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
       },
       async getSystemStatusData () {
         try {
           const systemResponse = await getSystemStatus()
           this.systemStatusesData = systemResponse.data
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
       },
       async getAntigenData () {
         try {
           const antigenResponse = await getAntigenos()
           this.antigensData = antigenResponse.data
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
       },
       async getHealthStatusData () {
         try {
           const healthResponse = await getHealthStatus()
           this.healthData = healthResponse.data
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
       },
       async getProvincesData () {
         try {
           const provincesResponse = await getProvinces()
           this.provinces = provincesResponse.data
-        } catch (e) { console.log(e) }
-      },
-      async getMunicipalitiesData (id) {
-        try {
-          const munResponse = await getMunicipalities()
-          this.healthData = munResponse.data
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
       },
       async getHealthAreaData (id) {
         try {
-          const healthAreaResponse = await getHealthAreas()
+          const healthAreaResponse = await getHealthAreas(id)
           this.healthAreas = healthAreaResponse.data
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
       },
       async detailsItem (item) {
         this.loadingPatientsData = true
@@ -1385,7 +1486,20 @@
           this.loadingPatientsData = false
           this.infoPatient = true
         } catch (e) {
-          console.log(e)
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
         }
       },
       closeDeleteU () {
@@ -1395,12 +1509,24 @@
         this.loadingPatientsData = true
         try {
           const patientsResponse = await getPatients(page)
-          console.log(patientsResponse)
           this.totalPatientsItems = patientsResponse.data.meta.total
           this.patients = patientsResponse.data.pacientes
           this.loadingPatientsData = false
-        } catch (err) {
-          console.log(err)
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
         }
       },
       initialize () {
@@ -1448,7 +1574,20 @@
             this.arrived = true
           }
         } catch (e) {
-          console.log(e)
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
         }
         this.editedIndex = this.patients.indexOf(item)
         this.dialog = true
@@ -1464,13 +1603,7 @@
       },
 
       deleteItem (item) {
-        console.log(item)
-        console.log(item.nombre)
-        console.log(item.apellidos)
-        console.log(item.id_paciente)
         this.toDeleteId = item.id_paciente
-        console.log(item.ci)
-        console.log(this.toDeleteId)
         this.editedIndex = this.patients.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
@@ -1482,7 +1615,20 @@
           await deletePatient(this.toDeleteId)
           this.loadPatientsData()
         } catch (e) {
-          console.log(e)
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
         }
         this.closeDelete()
         this.loadingPatientsData = false
@@ -1512,10 +1658,27 @@
           if (this.editedIndex > -1) {
             this.patientsLoading = true
             // Actualizar
-            await putPatient(this.editedItem)
-            this.clearData()
-            this.loadPatientsData()
-            Object.assign(this.patients[this.editedIndex], this.editedItem)
+            try {
+              await putPatient(this.editedItem)
+              this.clearData()
+              this.loadPatientsData()
+            } catch (e) {
+              console.log(e)
+              this.$toast.error(e.toString(), {
+                position: 'bottom-center',
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: false,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: 'button',
+                icon: true,
+                rtl: false,
+              })
+            }
           } else {
             // Añadir
             try {
@@ -1524,8 +1687,21 @@
               this.loadPatientsData()
             } catch (e) {
               console.log(e)
+              this.$toast.error(e.toString(), {
+                position: 'bottom-center',
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: false,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: 'button',
+                icon: true,
+                rtl: false,
+              })
             }
-            this.patients.push(this.editedItem)
           }
           this.close()
         } else {

@@ -21,6 +21,7 @@
     "vue-cli": "^2.9.6",
     "vue-meta": "^2.3.3",
     "vue-router": "^3.1.6",
+    "vue-toastification": "^1.7.11",
     "vuelidate": "^0.7.6",
     "vuetify": "^2.2.26",
     "vuex": "^3.6.2"
