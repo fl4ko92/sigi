@@ -4,7 +4,6 @@ import {
   requestData,
   requestDataFormUrlEncoded,
 } from './requestHeadersHelper'
-import queryString from 'query-string'
 
 export async function getCenters (page = 1) {
   const url = `${REQUEST_DIR}centros?page=${page}`

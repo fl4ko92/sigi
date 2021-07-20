@@ -61,6 +61,21 @@
                           label="Nombre"
                         />
                       </v-col>
+                       <v-col
+                        cols="12"
+                        sm="6"
+                        md="4"
+                      >
+                        <v-autocomplete
+                          v-model="editedItem.provincia"
+                          :items="provinces"
+                          color="white"
+                          item-text="nombre"
+                          label="Provincia"
+                          item-value="id"
+                          @change="loadMunicipalitiesData(editedItem.provincia)"
+                        />
+                      </v-col>
                       <v-col
                         cols="12"
                         sm="6"
@@ -69,8 +84,9 @@
                         <v-autocomplete
                           v-model="editedItem.municipio"
                           :items="municipalities"
+                          item-value="nombre"
                           color="white"
-                          item-text="name"
+                          item-text="nombre"
                           label="Municipio"
                         />
                       </v-col>
@@ -421,7 +437,7 @@
                 </template>
                 <span>Eliminar</span>
               </v-tooltip>
-              <v-tooltip bottom>
+              <!-- <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
                     color="info"
@@ -433,7 +449,7 @@
                   </v-icon>
                 </template>
                 <span>Detalles</span>
-              </v-tooltip>
+              </v-tooltip> -->
             </template>
             <template v-slot:no-data>
               <v-btn
@@ -673,6 +689,7 @@
   import InfoBox from '@/components/InfoBox.vue'
   import { getCenters, getCenter, postCenter, putCenter, deleteCenter } from '@/axios/centers'
   import { getAreas, getArea, postArea, putArea, deleteArea } from '@/axios/areas'
+  import { getMunicipalities, getProvinces} from '@/axios/nomenclators'
   export default {
     components: { InfoBox },
     data: () => ({
@@ -770,12 +787,8 @@
       dialogDelete: false,
       dialogAreaDelete: false,
       dialogRoomDelete: false,
-      municipalities: [
-        { name: 'Santa Clara', abbr: 'SC', id: 1 },
-        { name: 'Manicaragua', abbr: 'MC', id: 2 },
-        { name: 'Remedios', abbr: 'RE', id: 3 },
-        { name: 'Camajuani', abbr: 'CA', id: 4 },
-      ],
+      provinces: [],
+      municipalities: [],
       categories: [
         { name: 'Sospechoso', id: 1 },
         { name: 'Positivo', id: 2 },
@@ -820,6 +833,7 @@
       editedRoomIndex: -1,
       editedItem: {
         nombre_centro: '',
+        provincia: '',
         municipio: '',
         organismo: '',
         cap_total: 0,
@@ -828,6 +842,7 @@
       },
       defaultItem: {
         nombre_centro: '',
+        provincia: '',
         municipio: '',
         organismo: '',
         cap_total: 0,
@@ -855,7 +870,6 @@
         capacity: 0,
       },
     }),
-
     computed: {
       formTitle () {
         return this.editedIndex === -1 ? 'Nuevo Centro' : 'Editar Centro'
@@ -867,7 +881,6 @@
         return this.editedRoomIndex === -1 ? 'Nueva Habitación' : 'Editar Habitación'
       },
     },
-
     watch: {
       dialog (val) {
         val || this.close()
@@ -888,13 +901,58 @@
         val || this.closeRoomDelete()
       },
     },
-
+   created () {
+      this.initialize()
+      this.getProvincesData()
+      this.loadMunicipalitiesData()
+    },
     async mounted () {
       this.initialize()
       this.loadCentersData()
     },
-
     methods: {
+      async loadMunicipalitiesData (id) {
+        try {
+          const municipalitiesRes = await getMunicipalities(id)
+          this.municipalities = municipalitiesRes.data
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
+      },
+       async getProvincesData () {
+        try {
+          const provincesResponse = await getProvinces()
+          this.provinces = provincesResponse.data
+        } catch (e) {
+          this.$toast.error(e.toString(), {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
+        }
+      },
       async loadCentersData (page = 1) {
         this.loadingCentersData = true
         try {
@@ -1017,7 +1075,6 @@
           },
         ]
       },
-
       editItem (item) {
         this.editedIndex = this.centers.indexOf(item)
         this.editedItem = Object.assign({}, item)
@@ -1033,7 +1090,6 @@
         this.editedRoomItem = Object.assign({}, item)
         this.roomsDialog = true
       },
-
       deleteItem (item) {
         this.editedIndex = this.centers.indexOf(item)
         this.editedItem = Object.assign({}, item)
@@ -1053,7 +1109,6 @@
         this.editedRoomItem = Object.assign({}, item)
         this.dialogRoomDelete = true
       },
-
       async deleteItemConfirm () {
         try {
           await deleteCenter(this.editedItem.id_centro)
@@ -1078,7 +1133,6 @@
         this.rooms.splice(this.editedRoomIndex, 1)
         this.closeRoomDelete()
       },
-
       close () {
         this.dialog = false
         this.$nextTick(() => {
@@ -1100,7 +1154,6 @@
           this.editedRoomIndex = -1
         })
       },
-
       closeDelete () {
         this.dialogDelete = false
         this.$nextTick(() => {
@@ -1122,7 +1175,6 @@
           this.editedRoomIndex = -1
         })
       },
-
       async save () {
         if (this.editedIndex > -1) {
           await putCenter(this.editedItem)
