@@ -226,11 +226,18 @@
                             sm="6"
                             md="4"
                           >
-                            <v-combobox
-                              v-model="editedItem.remite_caso"
-                              :items="remissionTypes"
-                              label="Remite el Caso"
-                            />
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-combobox
+                                  v-model="editedItem.remite_caso"
+                                  v-bind="attrs"
+                                  :items="remissionTypes"
+                                  label="Remite el Caso"
+                                  v-on="on"
+                                />
+                              </template>
+                              <span>En caso de no estar escriba de donde lo remiten</span>
+                            </v-tooltip>
                           </v-col>
                         <!-- <v-col
                           cols="12"
@@ -809,13 +816,6 @@
                 <v-btn
                   color="blue darken-1"
                   text
-                  @click="showMeData"
-                >
-                  Cancelar
-                </v-btn>
-                <v-btn
-                  color="blue darken-1"
-                  text
                   @click="close"
                 >
                   Cancelar
@@ -931,7 +931,23 @@
           </template>
           <span>Detalle Paciente</span>
         </v-tooltip>
-        <!-- <v-tooltip
+        <v-tooltip
+          bottom
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon
+              class="mr-2"
+              color="grey"
+              v-bind="attrs"
+              v-on="on"
+              @click="admit(item)"
+            >
+              mdi-clipboard-check
+            </v-icon>
+          </template>
+          <span>Asignar Capacidad</span>
+        </v-tooltip>
+        <v-tooltip
           v-if="item.status !== 'Ingresado'"
           bottom
         >
@@ -948,23 +964,6 @@
           </template>
           <span>Ingresar</span>
         </v-tooltip>
-        <v-tooltip
-          v-if="!item.isolationCenter"
-          bottom
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              class="mr-2"
-              color="grey"
-              v-bind="attrs"
-              v-on="on"
-              @click="admit(item)"
-            >
-              mdi-clipboard-check
-            </v-icon>
-          </template>
-          <span>Asignar Capacidad</span>
-        </v-tooltip> -->
       </template>
       <template v-slot:no-data>
         No hay datos disponibles
@@ -977,7 +976,7 @@
     >
       <patient-file
         :patient="editedItem"
-        @close-click="infoPatient = !infoPatient"
+        @close-click="closeDetails"
       />
     </v-dialog>
   </div>
@@ -996,7 +995,6 @@
     data: () => ({
       remissionTypes: ['Policlínico', 'C.M.F.', 'Hospital'],
       antigensData: [],
-      systemStatusesData: [],
       patientsFilters: {
         page: 1,
       },
@@ -1045,7 +1043,6 @@
       sexes: [
         { nombre: 'Masculino', id: 'M' }, { nombre: 'Femenino', id: 'F' },
       ],
-      provinces: [],
       municipalities: [],
       categories: [],
       headers: [
@@ -1163,6 +1160,9 @@
     }),
 
     computed: {
+      provinces () {
+        return this.$store.getters.provinces
+      },
       countriesD () {
         return COUNTRIES
       },
@@ -1181,6 +1181,9 @@
       patientIsAsymptomatic () {
         return this.editedItem.sintomas.fecha_sintomas !== null
       },
+      systemStatusesData () {
+        return this.$store.getters.systemStatuses
+      },
     },
 
     watch: {
@@ -1194,19 +1197,16 @@
 
     created () {
       this.loadPatientsData()
-      // this.getCategoriesData()
+      this.getCategoriesData()
       this.getSystemStatusData()
       this.getHealthStatusData()
-      this.getProvincesData()
+      getProvinces()
       this.getAntigenData()
     },
 
     methods: {
-      showMeData () {
-        console.log(this.editedItem)
-      },
       async loadMunicipalitiesData (id) {
-        console.log('Hello world!!')
+        console.log(id)
         try {
           const municipalitiesRes = await getMunicipalities(id)
           this.municipalities = municipalitiesRes.data
@@ -1251,7 +1251,7 @@
       async getSystemStatusData () {
         try {
           const systemResponse = await getSystemStatus()
-          this.systemStatusesData = systemResponse.data
+          this.$store.commit('setSystemStatuses', systemResponse.data)
         } catch (e) {
           this.$toast.error(e.toString(), {
             position: 'bottom-center',
@@ -1311,27 +1311,6 @@
           })
         }
       },
-      async getProvincesData () {
-        try {
-          const provincesResponse = await getProvinces()
-          this.provinces = provincesResponse.data
-        } catch (e) {
-          this.$toast.error(e.toString(), {
-            position: 'bottom-center',
-            timeout: 5000,
-            closeOnClick: true,
-            pauseOnFocusLoss: false,
-            pauseOnHover: true,
-            draggable: true,
-            draggablePercent: 0.6,
-            showCloseButtonOnHover: false,
-            hideProgressBar: true,
-            closeButton: 'button',
-            icon: true,
-            rtl: false,
-          })
-        }
-      },
       async getHealthAreaData (id) {
         try {
           const healthAreaResponse = await getHealthAreas(id)
@@ -1370,7 +1349,7 @@
               this.noApp = false
             }
           }
-          if (this.editeditem.sintomas !== null) {
+          if (this.editedItem.sintomas !== null) {
             this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
             this.editedItem.fiebre = this.editedItem.sintomas.fiebre
             this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
@@ -1514,6 +1493,8 @@
         }
         this.editedIndex = this.patients.indexOf(item)
         this.dialog = true
+        this.$refs.form.resetValidation()
+
         this.loadingPatientsData = false
       },
       paginatePatients (pageInfo) {
@@ -1536,6 +1517,20 @@
         this.patients.splice(this.editedIndex, 1)
         try {
           await deletePatient(this.toDeleteId)
+          this.$toast.success('Registro eliminado correctamente', {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
           this.loadPatientsData()
         } catch (e) {
           this.$toast.error(e.toString(), {
@@ -1559,6 +1554,8 @@
 
       close () {
         this.dialog = false
+        this.$refs.form.resetValidation()
+
         this.$nextTick(() => {
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
@@ -1566,6 +1563,13 @@
       },
       closeDelete () {
         this.dialogDelete = false
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        })
+      },
+      closeDetails () {
+        this.infoPatient = false
         this.$nextTick(() => {
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
@@ -1583,11 +1587,27 @@
             // Actualizar
             try {
               await putPatient(this.editedItem)
+              this.$toast.success('Datos actualizados correctamente', {
+                position: 'bottom-center',
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: false,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: 'button',
+                icon: true,
+                rtl: false,
+              })
+              this.$refs.form.reset()
+
+              this.$refs.form.resetValidation()
               this.clearData()
               this.loadPatientsData()
               this.close()
             } catch (e) {
-              console.log(e)
               this.$toast.error(e.toString(), {
                 position: 'bottom-center',
                 timeout: 5000,
@@ -1607,11 +1627,27 @@
             // Añadir
             try {
               await postPatient(this.editedItem)
+              this.$toast.success('Registro exitoso', {
+                position: 'bottom-center',
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: false,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: 'button',
+                icon: true,
+                rtl: false,
+              })
+              this.$refs.form.reset()
+
+              this.$refs.form.resetValidation()
               this.clearData()
               this.loadPatientsData()
               this.close()
             } catch (e) {
-              console.log(e)
               this.$toast.error(e.toString(), {
                 position: 'bottom-center',
                 timeout: 5000,

@@ -4,7 +4,6 @@ import { requestData, requestDataFormUrlEncoded } from './requestHeadersHelper'
 import queryString from 'query-string'
 
 export async function getAreas (idCenter, page = 1) {
-  console.log('Aqui llega')
   const url = `${REQUEST_DIR}centros/${idCenter}/areas?page=${page}`
   const response = await axios.get(url, requestData())
   return response

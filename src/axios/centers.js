@@ -20,7 +20,6 @@ export async function getCenter (id) {
 
 export async function postCenter (data) {
   const url = `${REQUEST_DIR}centros`
-  data = queryString.stringify(data)
   const response = await axios.post(url, data, requestDataFormUrlEncoded())
   return response
 }
@@ -33,7 +32,6 @@ export async function deleteCenter (id) {
 
 export async function putCenter (data) {
   const url = `${REQUEST_DIR}centros/${data.id_centro}`
-  data = queryString.stringify(data)
   const response = await axios.put(url, data, requestDataFormUrlEncoded())
   return response
 }

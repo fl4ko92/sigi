@@ -1458,3 +1458,4 @@ export const COUNTRIES = [{
                     code: 'AX',
                   },
 ]
+export const DECRYPT_KEY = 'xFr#s1r%K2'

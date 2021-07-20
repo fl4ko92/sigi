@@ -61,7 +61,6 @@
     }),
     methods: {
       showHideDrawer () {
-        console.log(this.$store.getters.drawer)
         this.$store.commit('setDrawer')
       },
     },
