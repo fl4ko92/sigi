@@ -31,7 +31,7 @@
       </div> -->
 
       <v-app-bar-nav-icon
-        @click="drawer = !drawer"
+        @click="showHideDrawer"
       />
     </v-app-bar>
 
@@ -59,6 +59,11 @@
         'Pro',
       ],
     }),
+    methods: {
+      showHideDrawer () {
+        this.$store.commit('setDrawer')
+      },
+    },
   }
 </script>
 

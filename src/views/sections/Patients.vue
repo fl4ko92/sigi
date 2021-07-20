@@ -1,6 +1,5 @@
 <template>
   <div style="margin: 8px">
-    <info-box :stats="myStats" />
     <v-data-table
       locale="es-es"
       style="margin-top: 8px"
@@ -73,6 +72,7 @@
                     v-model="editedItem.categoria"
                     :items="categories"
                     item-text="nombre"
+                    :rules="healthAreaRules"
                     item-value="id"
                     label="Categoría"
                   />
@@ -226,10 +226,18 @@
                             sm="6"
                             md="4"
                           >
-                            <v-text-field
-                              v-model="editedItem.remite_caso"
-                              label="Centro que remite el caso"
-                            />
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-combobox
+                                  v-model="editedItem.remite_caso"
+                                  v-bind="attrs"
+                                  :items="remissionTypes"
+                                  label="Remite el Caso"
+                                  v-on="on"
+                                />
+                              </template>
+                              <span>En caso de no estar escriba de donde lo remiten</span>
+                            </v-tooltip>
                           </v-col>
                         <!-- <v-col
                           cols="12"
@@ -808,13 +816,6 @@
                 <v-btn
                   color="blue darken-1"
                   text
-                  @click="showMeData"
-                >
-                  Cancelar
-                </v-btn>
-                <v-btn
-                  color="blue darken-1"
-                  text
                   @click="close"
                 >
                   Cancelar
@@ -930,7 +931,23 @@
           </template>
           <span>Detalle Paciente</span>
         </v-tooltip>
-        <!-- <v-tooltip
+        <v-tooltip
+          bottom
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon
+              class="mr-2"
+              color="grey"
+              v-bind="attrs"
+              v-on="on"
+              @click="admit(item)"
+            >
+              mdi-clipboard-check
+            </v-icon>
+          </template>
+          <span>Asignar Capacidad</span>
+        </v-tooltip>
+        <v-tooltip
           v-if="item.status !== 'Ingresado'"
           bottom
         >
@@ -947,31 +964,9 @@
           </template>
           <span>Ingresar</span>
         </v-tooltip>
-        <v-tooltip
-          v-if="!item.isolationCenter"
-          bottom
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              class="mr-2"
-              color="grey"
-              v-bind="attrs"
-              v-on="on"
-              @click="admit(item)"
-            >
-              mdi-clipboard-check
-            </v-icon>
-          </template>
-          <span>Asignar Capacidad</span>
-        </v-tooltip> -->
       </template>
       <template v-slot:no-data>
-        <v-btn
-          color="primary"
-          @click="initialize"
-        >
-          Reset
-        </v-btn>
+        No hay datos disponibles
       </template>
     </v-data-table>
     <v-dialog
@@ -981,7 +976,7 @@
     >
       <patient-file
         :patient="editedItem"
-        @close-click="infoPatient = !infoPatient"
+        @close-click="closeDetails"
       />
     </v-dialog>
   </div>
@@ -998,8 +993,8 @@
   export default {
     components: { InfoBox, PatientFile },
     data: () => ({
+      remissionTypes: ['Policlínico', 'C.M.F.', 'Hospital'],
       antigensData: [],
-      systemStatusesData: [],
       patientsFilters: {
         page: 1,
       },
@@ -1022,6 +1017,7 @@
         v => isCmf(v) || 'Este campo es requerido',
       ],
       numberRules: [
+        v => !!v || 'Este campo es requerido',
         v => isPositiveNumber(v) || 'Debe chequear la edad',
       ],
       ciRules: [
@@ -1036,108 +1032,19 @@
         v => !!v || 'Este campo es requerido',
         v => isLastName(v) || 'Debe chequear el nombre',
       ],
-      date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
       menu: false,
       modal: false,
       menu2: false,
       menu3: false,
-
-      myStats: [
-        {
-          bgColor: 'red  lighten-1',
-          iconClass: 'grey white--text',
-          icon: 'mdi-account-alert',
-          title: 'Pacientes Registrados',
-          data: '150',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'orange lighten-2',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-search',
-          title: 'Pacientes Sospechosos',
-          data: '78',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'pink  darken-1',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-plus',
-          title: 'Pacientes Positivos',
-          data: '72',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'pink  darken-1',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-plus',
-          title: 'Sospechosos Pendientes a Ingreso',
-          data: '25',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-        {
-          bgColor: 'pink  darken-1',
-          iconClass: 'grey darken-5 white--text',
-          icon: 'mdi-account-plus',
-          title: 'Positivos Pendientes a Ingreso',
-          data: '15',
-          action: {
-            label: 'more',
-            link: '',
-          },
-        },
-      ],
-      statuses: [
-        { nombre: 'Ingresado' },
-        { nombre: 'En transporte' },
-        { nombre: 'Pendiente' },
-        { nombre: 'En IRA del AS' },
-      ],
-      isolationCenters: [
-        { nombre: 'Perez Quintosa' },
-        { nombre: 'Pedagogico' },
-        { nombre: 'Hospital Militar' },
-        { nombre: 'Minerva' },
-        { nombre: 'UCLV' },
-        { nombre: 'Politecnico de la Salud' },
-      ],
       dialogDeleteUnavailable: false,
       dialog: false,
       dialogDelete: false,
-      centerTypes: [
-        { nombre: 'Policlínico' },
-        { nombre: 'C.M.F' },
-        { nombre: 'Hospital' },
-        { nombre: 'Otro' },
-      ],
-      testVariants: [
-        { nombre: 'Positivo', id: 1 },
-        { nombre: 'Negativo', id: 0 },
-        { nombre: 'No realizado', id: 2 },
-      ],
       healthAreas: [],
       sexes: [
         { nombre: 'Masculino', id: 'M' }, { nombre: 'Femenino', id: 'F' },
       ],
-      provinces: [],
       municipalities: [],
-      categories: [
-        { id: 1, nombre: 'SOSPECHOSO' },
-        { id: 2, nombre: 'CONTACTO' },
-        { id: 3, nombre: 'POSITIVO' },
-      ],
+      categories: [],
       headers: [
         {
           text: 'CI',
@@ -1253,6 +1160,9 @@
     }),
 
     computed: {
+      provinces () {
+        return this.$store.getters.provinces
+      },
       countriesD () {
         return COUNTRIES
       },
@@ -1271,6 +1181,9 @@
       patientIsAsymptomatic () {
         return this.editedItem.sintomas.fecha_sintomas !== null
       },
+      systemStatusesData () {
+        return this.$store.getters.systemStatuses
+      },
     },
 
     watch: {
@@ -1283,20 +1196,17 @@
     },
 
     created () {
-      this.initialize()
-      // this.getCategoriesData()
+      this.loadPatientsData()
+      this.getCategoriesData()
       this.getSystemStatusData()
       this.getHealthStatusData()
-      this.getProvincesData()
+      getProvinces()
       this.getAntigenData()
     },
 
     methods: {
-      showMeData () {
-        console.log(this.editedItem)
-      },
       async loadMunicipalitiesData (id) {
-        console.log('Hello world!!')
+        console.log(id)
         try {
           const municipalitiesRes = await getMunicipalities(id)
           this.municipalities = municipalitiesRes.data
@@ -1341,7 +1251,7 @@
       async getSystemStatusData () {
         try {
           const systemResponse = await getSystemStatus()
-          this.systemStatusesData = systemResponse.data
+          this.$store.commit('setSystemStatuses', systemResponse.data)
         } catch (e) {
           this.$toast.error(e.toString(), {
             position: 'bottom-center',
@@ -1401,27 +1311,6 @@
           })
         }
       },
-      async getProvincesData () {
-        try {
-          const provincesResponse = await getProvinces()
-          this.provinces = provincesResponse.data
-        } catch (e) {
-          this.$toast.error(e.toString(), {
-            position: 'bottom-center',
-            timeout: 5000,
-            closeOnClick: true,
-            pauseOnFocusLoss: false,
-            pauseOnHover: true,
-            draggable: true,
-            draggablePercent: 0.6,
-            showCloseButtonOnHover: false,
-            hideProgressBar: true,
-            closeButton: 'button',
-            icon: true,
-            rtl: false,
-          })
-        }
-      },
       async getHealthAreaData (id) {
         try {
           const healthAreaResponse = await getHealthAreas(id)
@@ -1448,40 +1337,48 @@
         try {
           const patientResponse = await getPatient(item.id_paciente)
           this.editedItem = Object.assign({}, patientResponse.data.paciente)
-          this.editedItem.hipertension = this.editedItem.apps.hipertension
-          this.editedItem.diabetes = this.editedItem.apps.diabetes
-          this.editedItem.asma = this.editedItem.apps.asma
-          this.editedItem.obesidad = this.editedItem.apps.obesidad
-          this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
-          this.editedItem.oncologia = this.editedItem.apps.oncologia
-          this.editedItem.otros_apps = this.editedItem.apps.otros
-          if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
-            this.noApp = false
+          if (this.editedItem.apps !== null) {
+            this.editedItem.hipertension = this.editedItem.apps.hipertension
+            this.editedItem.diabetes = this.editedItem.apps.diabetes
+            this.editedItem.asma = this.editedItem.apps.asma
+            this.editedItem.obesidad = this.editedItem.apps.obesidad
+            this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
+            this.editedItem.oncologia = this.editedItem.apps.oncologia
+            this.editedItem.otros_apps = this.editedItem.apps.otros
+            if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
+              this.noApp = false
+            }
           }
-          this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
-          this.editedItem.fiebre = this.editedItem.sintomas.fiebre
-          this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
-          this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
-          this.editedItem.tos = this.editedItem.sintomas.tos
-          this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
-          this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
-          this.editedItem.cefalea = this.editedItem.sintomas.cefalea
-          this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
-          this.editedItem.otros_sint = this.editedItem.sintomas.otros
-          if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
-            this.asymptomatic = false
+          if (this.editedItem.sintomas !== null) {
+            this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
+            this.editedItem.fiebre = this.editedItem.sintomas.fiebre
+            this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
+            this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
+            this.editedItem.tos = this.editedItem.sintomas.tos
+            this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
+            this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
+            this.editedItem.cefalea = this.editedItem.sintomas.cefalea
+            this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
+            this.editedItem.otros_sint = this.editedItem.sintomas.otros
+            if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
+              this.asymptomatic = false
+            }
           }
-          this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
-          this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
-          this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
-          if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
-            this.isContact = true
+          if (this.editedItem.contacto !== null) {
+            this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
+            this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
+            this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
+            if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
+              this.isContact = true
+            }
           }
-          this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
-          this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
-          this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
-          if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
-            this.arrived = true
+          if (this.editedItem.arribo !== null) {
+            this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
+            this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
+            this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
+            if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
+              this.arrived = true
+            }
           }
           this.loadingPatientsData = false
           this.infoPatient = true
@@ -1529,49 +1426,54 @@
           })
         }
       },
-      initialize () {
-        this.loadPatientsData()
-      },
 
       async editItem (item) {
         this.loadingPatientsData = true
         try {
           const patientResponse = await getPatient(item.id_paciente)
           this.editedItem = Object.assign({}, patientResponse.data.paciente)
-          this.editedItem.hipertension = this.editedItem.apps.hipertension
-          this.editedItem.diabetes = this.editedItem.apps.diabetes
-          this.editedItem.asma = this.editedItem.apps.asma
-          this.editedItem.obesidad = this.editedItem.apps.obesidad
-          this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
-          this.editedItem.oncologia = this.editedItem.apps.oncologia
-          this.editedItem.otros_apps = this.editedItem.apps.otros
-          if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
-            this.noApp = false
+          if (this.editedItem.apps !== null) {
+            this.editedItem.hipertension = this.editedItem.apps.hipertension
+            this.editedItem.diabetes = this.editedItem.apps.diabetes
+            this.editedItem.asma = this.editedItem.apps.asma
+            this.editedItem.obesidad = this.editedItem.apps.obesidad
+            this.editedItem.insuficiencia_renal = this.editedItem.apps.insuficiencia_renal
+            this.editedItem.oncologia = this.editedItem.apps.oncologia
+            this.editedItem.otros_apps = this.editedItem.apps.otros
+            if (this.editedItem.hipertension || this.editedItem.diabetes || this.editedItem.asma || this.editedItem.obesidad || this.editedItem.insuficiencia_renal || this.editedItem.oncologia || this.editedItem.otros_apps) {
+              this.noApp = false
+            }
           }
-          this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
-          this.editedItem.fiebre = this.editedItem.sintomas.fiebre
-          this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
-          this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
-          this.editedItem.tos = this.editedItem.sintomas.tos
-          this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
-          this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
-          this.editedItem.cefalea = this.editedItem.sintomas.cefalea
-          this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
-          this.editedItem.otros_sint = this.editedItem.sintomas.otros
-          if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
-            this.asymptomatic = false
+          if (this.editedItem.sintomas !== null) {
+            this.editedItem.fecha_sintomas = this.editedItem.sintomas.fecha_sintomas
+            this.editedItem.fiebre = this.editedItem.sintomas.fiebre
+            this.editedItem.rinorrea = this.editedItem.sintomas.rinorrea
+            this.editedItem.congestion_nasal = this.editedItem.sintomas.congestion_nasal
+            this.editedItem.tos = this.editedItem.sintomas.tos
+            this.editedItem.expectoracion = this.editedItem.sintomas.expectoracion
+            this.editedItem.dificultad_respiratoria = this.editedItem.sintomas.dificultad_respiratoria
+            this.editedItem.cefalea = this.editedItem.sintomas.cefalea
+            this.editedItem.dolor_garganta = this.editedItem.sintomas.dolor_garganta
+            this.editedItem.otros_sint = this.editedItem.sintomas.otros
+            if (this.editedItem.fecha_sintomas || this.editedItem.fiebre || this.editedItem.rinorrea || this.editedItem.congestion_nasal || this.editedItem.tos || this.editedItem.expectoracion || this.editedItem.dificultad_respiratoria || this.editedItem.cefalea || this.editedItem.dolor_garganta || this.editedItem.otros_sint) {
+              this.asymptomatic = false
+            }
           }
-          this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
-          this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
-          this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
-          if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
-            this.isContact = true
+          if (this.editedItem.contacto !== null) {
+            this.editedItem.fecha_contacto = this.editedItem.contacto.fecha_contacto
+            this.editedItem.lugar_contacto = this.editedItem.contacto.lugar_contacto
+            this.editedItem.tipo_contacto = this.editedItem.contacto.tipo_contacto
+            if (this.editedItem.fecha_contacto || this.editedItem.lugar_contacto || this.editedItem.tipo_contacto) {
+              this.isContact = true
+            }
           }
-          this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
-          this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
-          this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
-          if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
-            this.arrived = true
+          if (this.editedItem.arribo !== null) {
+            this.editedItem.pais_procedencia = this.editedItem.arribo.pais_procedencia
+            this.editedItem.lugar_estancia = this.editedItem.arribo.lugar_estancia
+            this.editedItem.fecha_arribo = this.editedItem.arribo.fecha_arribo
+            if (this.editedItem.pais_procedencia || this.editedItem.lugar_estancia || this.editedItem.fecha_arribo) {
+              this.arrived = true
+            }
           }
         } catch (e) {
           this.$toast.error(e.toString(), {
@@ -1591,6 +1493,8 @@
         }
         this.editedIndex = this.patients.indexOf(item)
         this.dialog = true
+        this.$refs.form.resetValidation()
+
         this.loadingPatientsData = false
       },
       paginatePatients (pageInfo) {
@@ -1613,6 +1517,20 @@
         this.patients.splice(this.editedIndex, 1)
         try {
           await deletePatient(this.toDeleteId)
+          this.$toast.success('Registro eliminado correctamente', {
+            position: 'bottom-center',
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: false,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: 'button',
+            icon: true,
+            rtl: false,
+          })
           this.loadPatientsData()
         } catch (e) {
           this.$toast.error(e.toString(), {
@@ -1636,6 +1554,8 @@
 
       close () {
         this.dialog = false
+        this.$refs.form.resetValidation()
+
         this.$nextTick(() => {
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
@@ -1643,6 +1563,13 @@
       },
       closeDelete () {
         this.dialogDelete = false
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        })
+      },
+      closeDetails () {
+        this.infoPatient = false
         this.$nextTick(() => {
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
@@ -1660,10 +1587,27 @@
             // Actualizar
             try {
               await putPatient(this.editedItem)
+              this.$toast.success('Datos actualizados correctamente', {
+                position: 'bottom-center',
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: false,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: 'button',
+                icon: true,
+                rtl: false,
+              })
+              this.$refs.form.reset()
+
+              this.$refs.form.resetValidation()
               this.clearData()
               this.loadPatientsData()
+              this.close()
             } catch (e) {
-              console.log(e)
               this.$toast.error(e.toString(), {
                 position: 'bottom-center',
                 timeout: 5000,
@@ -1683,10 +1627,27 @@
             // Añadir
             try {
               await postPatient(this.editedItem)
+              this.$toast.success('Registro exitoso', {
+                position: 'bottom-center',
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: false,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: 'button',
+                icon: true,
+                rtl: false,
+              })
+              this.$refs.form.reset()
+
+              this.$refs.form.resetValidation()
               this.clearData()
               this.loadPatientsData()
+              this.close()
             } catch (e) {
-              console.log(e)
               this.$toast.error(e.toString(), {
                 position: 'bottom-center',
                 timeout: 5000,
@@ -1703,7 +1664,6 @@
               })
             }
           }
-          this.close()
         } else {
           this.$toast.error('Chequee los datos incorrectos', {
             position: 'bottom-center',

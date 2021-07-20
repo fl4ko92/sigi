@@ -19,7 +19,7 @@
       </v-col>
       <v-col
         cols="12"
-        sm="8"
+        sm="10"
         md="10"
       >
         <v-row no-gutters>
@@ -85,7 +85,14 @@
             sm="5"
             md="10"
           >
-            {{ patient.sexo }}
+            <span
+              v-if="patient.sexo == 'M'"
+              v-text="'MASCULINO'"
+            />
+            <span
+              v-else-if="patient.sexo == 'F'"
+              v-text="'FEMENINO'"
+            />
           </v-col>
           <v-col
             cols="12"
@@ -153,6 +160,53 @@
           </v-col>
           <v-col
             cols="12"
+            sm="5"
+            md="2"
+          >
+            <v-icon sty>
+              mdi-list-status
+            </v-icon> Estado:
+          </v-col>
+          <v-col
+            cols="12"
+            sm="5"
+            md="10"
+          >
+            {{ estadoSistema }}
+          </v-col>
+          <v-col
+            cols="12"
+            sm="5"
+            md="2"
+          >
+            <v-icon sty>
+              mdi-test-tube
+            </v-icon>Antígeno:
+          </v-col>
+          <v-col
+            cols="12"
+            sm="5"
+            md="10"
+          >
+            <span
+              v-if="patient.test_antigeno == 2"
+              v-text="'NEGATIVO'"
+            />
+            <span
+              v-else-if="patient.test_antigeno == 3"
+              v-text="'NO REALIZADO'"
+            />
+            <span
+              v-else-if="patient.test_antigeno == 1"
+              v-text="'POSITIVO'"
+            />
+            <span
+              v-else
+              v-text="'no realizado'"
+            />
+          </v-col>
+          <v-col
+            cols="12"
           >
             <v-card style="margin-top: 4px">
               <v-card-subtitle>
@@ -196,7 +250,7 @@
                   style="margin: 4px"
                 >Dolor de Garganta</span>
                 <span
-                  v-if="patient.otros"
+                  v-if="patient.otros_sint"
                   style="margin: 4px"
                 >{{ patient.otros_sint }}</span>
               </v-card-text>
@@ -212,7 +266,7 @@
               <v-card-subtitle>
                 <b>APP</b>
               </v-card-subtitle>
-              <v-card-text v-if="!noapp">
+              <v-card-text v-if="!noApp">
                 <span
                   v-if="patient.hipertension"
                   style="margin: 4px"
@@ -238,12 +292,12 @@
                   style="margin: 4px"
                 >Oncología</span>
                 <span
-                  v-if="patient.otros_apps"
+                  v-if="!patient.otros_apps === ''"
                   style="margin: 4px"
                 >{{ patient.otros_apps }}</span>
               </v-card-text>
               <v-card-text v-else>
-                <span>No refiere</span>
+                <span>No Refiere</span>
               </v-card-text>
             </v-card>
           </v-col>
@@ -304,29 +358,21 @@
               </v-card-subtitle>
               <v-card-text>
                 <span
-                  v-if="patient.estado_sistema"
-                  style="margin: 4px"
-                >{{ patient.estado_sistema }}</span>
-                <span
                   v-if="patient.trabajador_salud"
                   style="margin: 4px"
-                >Trabajador de Salud</span>
+                ><v-icon>mdi-bottle-tonic-plus</v-icon> Trabajador de Salud</span>
                 <span
                   v-if="patient.ninho"
                   style="margin: 4px"
-                >Niño</span>
+                ><v-icon>mdi-baby-face</v-icon> Niño</span>
                 <span
                   v-if="patient.embarazada"
                   style="margin: 4px"
-                >Embarazada</span>
+                ><v-icon>mdi-human-pregnant</v-icon> Embarazada</span>
                 <span
                   v-if="patient.vacunado"
                   style="margin: 4px"
-                >Vacunado</span>
-                <span
-                  v-if="patient.test_antigeno"
-                  style="margin: 4px"
-                >Test antígeno {{ patient.test_antigeno }}</span>
+                ><v-icon>mdi-needle</v-icon> Vacunado</span>
               </v-card-text>
             </v-card>
           </v-col>
@@ -343,6 +389,15 @@
       >
         OK
       </v-btn>
+      <v-spacer v-if="!verified" />
+      <v-btn
+        v-if="!verified"
+        color="blue darken-1"
+        text
+        @click="dataVerified"
+      >
+        Verificar
+      </v-btn>
       <v-spacer />
     </v-card-actions>
   </v-card>
@@ -353,7 +408,7 @@
     name: 'PatientFile',
     props: {
       patient: {
-        type: {},
+        type: Object,
         default: null,
       },
     },
@@ -361,8 +416,19 @@
       formTitle: 'Datos del Paciente',
     }),
     computed: {
+      estadoSistema () {
+        const pepe = this.systemStatuses
+        let ok = null
+        pepe.forEach(element => {
+          if (element.id === this.patient.estado_sistema) {
+            ok = element.nombre
+          }
+        })
+        console.log(ok)
+        return ok
+      },
       noApp () {
-        return (this.patient.hipertension || this.patient.diabetes || this.patient.asma || this.patient.obesidad || this.patient.insuficiencia_renal || this.patient.oncologia || this.patient.otros_apps)
+        return (this.patient.hipertension || this.patient.diabetes || this.patient.asma || this.patient.obesidad || this.patient.insuficiencia_renal || this.patient.oncologia || this.patient.otros_apps !== '')
       },
       asymptomatic () {
         return !(this.patient.fecha_sintomas || this.patient.fiebre || this.patient.rinorrea || this.patient.congestion_nasal || this.patient.tos || this.patient.expectoracion || this.patient.dificultad_respiratoria || this.patient.cefalea || this.patient.dolor_garganta || this.patient.otros_sint)
@@ -373,9 +439,30 @@
       contact () {
         return (this.patient.fecha_contacto || this.patient.lugar_contacto || this.patient.tipo_contacto)
       },
+      systemStatuses () {
+        return this.$store.getters.systemStatuses
+      },
     },
     methods: {
       sendClose () {
+        this.$emit('close-click')
+      },
+      dataVerified () {
+        // TODO: Cambiar el estado de los datos del paciente
+        this.$toast.success('Usted ha verificado los datos satisfactoriamente', {
+          position: 'bottom-center',
+          timeout: 5000,
+          closeOnClick: true,
+          pauseOnFocusLoss: false,
+          pauseOnHover: true,
+          draggable: true,
+          draggablePercent: 0.6,
+          showCloseButtonOnHover: false,
+          hideProgressBar: true,
+          closeButton: 'button',
+          icon: true,
+          rtl: false,
+        })
         this.$emit('close-click')
       },
     },

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import store from '@/store'
 import { REQUEST_DIR } from '../utils/constants'
 import { requestData } from './requestHeadersHelper'
 
@@ -25,6 +26,9 @@ export async function getHealthStatus () {
 export async function getProvinces () {
   const url = `${REQUEST_DIR}nomenclador/provincia`
   const response = await axios.get(url, requestData())
+   console.log(response)
+   const provinces = response.data
+   store.commit('setProvinces', provinces)
   return response
 }
 export async function getMunicipalities (id = 1) {

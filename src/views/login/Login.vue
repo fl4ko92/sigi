@@ -22,7 +22,7 @@
     props: {
       id: {
         type: String,
-        default: 'home',
+        default: 'login',
       },
     },
   }

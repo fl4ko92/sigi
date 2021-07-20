@@ -690,7 +690,6 @@
   import { getCenters, getCenter, postCenter, putCenter, deleteCenter } from '@/axios/centers'
   import { getAreas, getArea, postArea, putArea, deleteArea } from '@/axios/areas'
   import { getMunicipalities, getProvinces} from '@/axios/nomenclators'
-
   export default {
     components: { InfoBox },
     data: () => ({
@@ -871,7 +870,6 @@
         capacity: 0,
       },
     }),
-
     computed: {
       formTitle () {
         return this.editedIndex === -1 ? 'Nuevo Centro' : 'Editar Centro'
@@ -883,7 +881,6 @@
         return this.editedRoomIndex === -1 ? 'Nueva Habitación' : 'Editar Habitación'
       },
     },
-
     watch: {
       dialog (val) {
         val || this.close()
@@ -904,18 +901,15 @@
         val || this.closeRoomDelete()
       },
     },
-
    created () {
       this.initialize()
       this.getProvincesData()
       this.loadMunicipalitiesData()
     },
-
     async mounted () {
       this.initialize()
       this.loadCentersData()
     },
-
     methods: {
       async loadMunicipalitiesData (id) {
         try {
@@ -1081,7 +1075,6 @@
           },
         ]
       },
-
       editItem (item) {
         this.editedIndex = this.centers.indexOf(item)
         this.editedItem = Object.assign({}, item)
@@ -1097,7 +1090,6 @@
         this.editedRoomItem = Object.assign({}, item)
         this.roomsDialog = true
       },
-
       deleteItem (item) {
         this.editedIndex = this.centers.indexOf(item)
         this.editedItem = Object.assign({}, item)
@@ -1117,7 +1109,6 @@
         this.editedRoomItem = Object.assign({}, item)
         this.dialogRoomDelete = true
       },
-
       async deleteItemConfirm () {
         try {
           await deleteCenter(this.editedItem.id_centro)
@@ -1142,7 +1133,6 @@
         this.rooms.splice(this.editedRoomIndex, 1)
         this.closeRoomDelete()
       },
-
       close () {
         this.dialog = false
         this.$nextTick(() => {
@@ -1164,7 +1154,6 @@
           this.editedRoomIndex = -1
         })
       },
-
       closeDelete () {
         this.dialogDelete = false
         this.$nextTick(() => {
@@ -1186,7 +1175,6 @@
           this.editedRoomIndex = -1
         })
       },
-
       async save () {
         if (this.editedIndex > -1) {
           await putCenter(this.editedItem)

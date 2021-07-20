@@ -1,9 +1,10 @@
 import { AGENT } from '@/utils/constants'
-import store from '@/store'
+import { decrypt } from '../utils/enc'
 
 export function requestData () {
   return {
     headers: {
+      Authorization: 'Bearer ' + decrypt(localStorage.getItem('tkn')),
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
@@ -16,6 +17,7 @@ export function requestData () {
 export function requestDataFormUrlEncoded () {
   return {
     headers: {
+      Authorization: 'Bearer ' + decrypt(localStorage.getItem('tkn')),
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },

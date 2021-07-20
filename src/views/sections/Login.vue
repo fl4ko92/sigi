@@ -1,10 +1,7 @@
 <template>
-  <base-section id="404">
+  <base-section id="Login">
     <v-main>
-      <v-container
-        class="fill-height"
-        fluid
-      >
+      <v-container>
         <v-row
           align="center"
           justify="center"
@@ -53,6 +50,7 @@
                     required
                     label="Contraseña"
                     type="password"
+                    @keydown.native.enter="submit"
                   />
                 </v-form>
               </v-card-text>
@@ -61,6 +59,7 @@
                 <v-btn
                   :disabled="!valid"
                   submit
+                  :loading="tryLogin"
                   @click="submit"
                 >
                   Entrar
@@ -73,76 +72,60 @@
     </v-main>
   </base-section>
 </template>
-
 <script>
+  import { login } from '@/axios/auth'
+  import { encrypt } from '@/utils/enc'
   export default {
     name: 'Login',
     data: () => ({
+      tryLogin: false,
       valid: true,
-      users: [],
-      stateId: -1,
       password: '',
       show1: false,
       error: '',
       alert: false,
       passwordRules: [
         v => !!v || 'Contraseña es requerida',
-        v => (v && v.length <= 20) || 'La contraseña no debe tener más de 20 caracteres',
-      ],
-      usernameRules: [
-        v => !!v || 'Nombre de usuario es requerido',
       ],
       username: '',
+      usernameRules: [
+        v => !!v || 'Usuario es requerido',
+      ],
+      checkbox: false,
     }),
-    computed: {
-
-    },
-    created () {
-
-    },
-    mounted () {
-
-    },
-    /* beforeCreate() {
-    if (this.$store.getters.getUidUser !== null && this.$store.getters.getUidUser !== 'null') {
-      this.$router.replace('/home');
-    }
-  }
-  , */
-
     methods: {
-      getToken () {
-        if (this.$store.getters.getToken !== null && this.$store.getters.getToken !== 'null') {
-          this.$router.replace('/home')
-        }
-        return this.$store.getters.getToken
-      },
-      submit () {
-        const dataUser = this.users
-        const stateId = -1
+      async submit () {
         this.$refs.form.validate()
         if (this.$refs.form.validate(true)) {
-          this.$store.dispatch('actionsLogin', {
-            axios: this.$axios,
-            user: this.username,
-            password: this.password,
-          })
-          const token = this.getToken()
-
-          if (token === null || token === -1) {
-            this.token = 'Credenciales erróneas'
-            this.alert = true
-            setTimeout(() => {
-              this.alert = false
-            }, 5000)
-            return console.log('Credenciales erróneas')
+          this.tryLogin = true
+          try {
+            const loginResponse = await login(this.username, this.password)
+            const token = loginResponse.data.token
+            const role = loginResponse.data.user.role
+            localStorage.setItem('role', role)
+            const data = encrypt(token)
+            localStorage.setItem('tkn', data)
+            this.$router.push({ name: 'Control' })
+            this.tryLogin = false
+          } catch (e) {
+            this.$toast.error('No autorizado', {
+              position: 'bottom-center',
+              timeout: 3000,
+              closeOnClick: true,
+              pauseOnFocusLoss: false,
+              pauseOnHover: true,
+              draggable: true,
+              draggablePercent: 0.6,
+              showCloseButtonOnHover: false,
+              hideProgressBar: true,
+              closeButton: 'button',
+              icon: true,
+              rtl: false,
+            })
+            this.tryLogin = false
           }
         }
-      }
-      ,
-
-    }
-    ,
+      },
+    },
   }
-
 </script>

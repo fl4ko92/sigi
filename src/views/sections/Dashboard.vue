@@ -4,20 +4,20 @@
       no-gutters
       style="padding: 8px"
     >
-      <info-box
+      <!-- <info-box
         :stats="monthlyStats"
         :more="true"
-      />
+      /> -->
     </v-row>
   </section>
 </template>
 
 <script>
-  import InfoBox from '@/components/InfoBox'
+ // import InfoBox from '@/components/InfoBox'
   export default {
 
     name: 'SectionDashboard',
-    components: { InfoBox },
+    // components: { InfoBox },
     data: () => ({
       monthlyStats: [
         {
