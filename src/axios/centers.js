@@ -1,13 +1,16 @@
 import axios from 'axios'
+import store from '@/store'
 import { REQUEST_DIR } from '../utils/constants'
 import {
   requestData,
   requestDataFormUrlEncoded,
 } from './requestHeadersHelper'
 
-export async function getCenters (page = 1) {
-  const url = `${REQUEST_DIR}centros?page=${page}`
-  const response = await axios.get(url, requestData())
+export async function getCenters (filters) {
+  const url = `${REQUEST_DIR}centros`
+  const response = await axios.get(url, requestData(filters))
+  const data = response.data.centros
+  store.commit('setCenters', data)
   return response
 }
 

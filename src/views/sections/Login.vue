@@ -103,8 +103,7 @@
             const token = loginResponse.data.token
             const role = loginResponse.data.user.role
             localStorage.setItem('role', role)
-            const data = encrypt(token)
-            localStorage.setItem('tkn', data)
+            localStorage.setItem('tkn', token)
             this.$router.push({ name: 'Control' })
             this.tryLogin = false
           } catch (e) {

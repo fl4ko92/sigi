@@ -1,6 +1,12 @@
 export default {
   drawer: true,
   systemStatuses: null,
-  provinces: null,
-  municipalities: null,
+  provinces: [],
+  municipalities: [],
+  categories: [],
+  centers: [],
+  clasifications: [],
+  antigens: [],
+  healthAreas: [],
+  healthStatuses: [],
 }

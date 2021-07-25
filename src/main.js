@@ -20,10 +20,10 @@ Vue.use(Vuebar)
 Vue.prototype.$axios = api
 localStorage.setItem('tkn', encrypt('pepe'))
 
-/* if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development') {
   const { worker } = require('./mocks/browser')
   worker.start()
-} */
+}
 
 Vue.use(Toast, {
   transition: 'Vue-Toastification__bounce',
