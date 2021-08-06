@@ -11,11 +11,14 @@ import 'vue-toastification/dist/index.css'
 import axios from 'axios'
 import api from '@/utils/api'
 import { encrypt } from './utils/enc'
+import MultiFiltersPlugin from "@/plugins/MultiFilters";
 
 Vue.use(Vuex)
 
 Vue.config.productionTip = false
 Vue.use(Vuebar)
+
+Vue.use(MultiFiltersPlugin)
 
 Vue.prototype.$axios = api
 localStorage.setItem('tkn', encrypt('pepe'))

@@ -108,7 +108,7 @@
             sm="5"
             md="10"
           >
-            {{ patient.direccion }} => {{ province }}  / {{ municipality }}
+            {{ patient.direccion }} => {{ patient.provincia }}  / {{ patient.municipio }}
           </v-col>
           <v-col
             cols="12"
@@ -124,7 +124,7 @@
             sm="5"
             md="10"
           >
-            {{ healthArea }}
+            {{ patient.area_salud }}
           </v-col>
           <v-col
             cols="12"
@@ -383,31 +383,20 @@
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="editable"
-        color="orange darken-1"
-        text
-        @click="sendEdit"
-      >
-        <v-icon>mdi-pencil</v-icon>
-        Editar
-      </v-btn>
-      <v-spacer v-if="!verified" />
-      <v-btn
-        v-if="!verified"
-        color="green darken-1"
-        text
-        @click="dataVerified"
-      >
-        <v-icon>mdi-account-check</v-icon>
-        Verificar
-      </v-btn>
-      <v-spacer />
-      <v-btn
         color="blue darken-1"
         text
         @click="sendClose"
       >
         OK
+      </v-btn>
+      <v-spacer v-if="!verified" />
+      <v-btn
+        v-if="!verified"
+        color="blue darken-1"
+        text
+        @click="dataVerified"
+      >
+        Verificar
       </v-btn>
       <v-spacer />
     </v-card-actions>
@@ -415,10 +404,8 @@
 </template>
 
 <script>
-  import { getMunicipalities, getHealthAreas } from '@/axios/nomenclators'
   export default {
     name: 'PatientFile',
-
     props: {
       patient: {
         type: Object,
@@ -426,32 +413,18 @@
       },
     },
     data: () => ({
-      editable: true,
-      verified: false,
       formTitle: 'Datos del Paciente',
-      healthAreas: [],
-      healthArea: null,
-      municipality: null,
     }),
     computed: {
       estadoSistema () {
-        const ststus = this.systemStatuses
+        const pepe = this.systemStatuses
         let ok = null
-        ststus.forEach(element => {
+        pepe.forEach(element => {
           if (element.id === this.patient.estado_sistema) {
             ok = element.nombre
           }
         })
-        return ok
-      },
-      province () {
-        const prov = this.provinces
-        let ok = null
-        prov.forEach(element => {
-          if (element.id === this.patient.provincia) {
-            ok = element.nombre
-          }
-        })
+        console.log(ok)
         return ok
       },
       noApp () {
@@ -469,61 +442,10 @@
       systemStatuses () {
         return this.$store.getters.systemStatuses
       },
-      provinces () {
-        return this.$store.getters.provinces
-      },
-      municipalities () {
-        return this.$store.getters.municipalities
-      },
-    },
-    async created () {
-      const hResponse = await getHealthAreas(this.patient.municipio)
-      this.healthAreas = hResponse.data
-      await getMunicipalities(this.patient.provincia)
-      const munic = this.municipalities
-      let ok = null
-      munic.forEach(element => {
-        if (element.id === this.patient.municipio) {
-          ok = element.nombre
-        }
-      })
-      this.municipality = ok
-      let hItem = null
-      const hh = this.healthAreas
-      hh.forEach(element => {
-        if (element.id === this.patient.area_salud) {
-          hItem = element.nombre
-        }
-      })
-      this.healthArea = hItem
     },
     methods: {
-      async getHealthAreasData () {
-        try {
-          const hResponse = await getHealthAreas(this.patient.municipio)
-          this.healthAreas = hResponse.data
-        } catch (e) {
-          this.$toast.error(e.toString(), {
-            position: 'bottom-center',
-            timeout: 5000,
-            closeOnClick: true,
-            pauseOnFocusLoss: false,
-            pauseOnHover: true,
-            draggable: true,
-            draggablePercent: 0.6,
-            showCloseButtonOnHover: false,
-            hideProgressBar: true,
-            closeButton: 'button',
-            icon: true,
-            rtl: false,
-          })
-        }
-      },
       sendClose () {
         this.$emit('close-click')
-      },
-      sendEdit () {
-        this.$emit('edit-click')
       },
       dataVerified () {
         // TODO: Cambiar el estado de los datos del paciente

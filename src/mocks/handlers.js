@@ -13,6 +13,7 @@ export default [
             organismo: 'MINED',
             created_at: '2021-07-06 21:45:51',
             updated_at: '2021-07-06 21:45:51',
+            categoria: 1,
           },
           {
             id_centro: 2,
@@ -21,6 +22,7 @@ export default [
             organismo: 'MES',
             created_at: '2021-07-06 21:45:51',
             updated_at: '2021-07-06 21:45:51',
+            categoria: 1,
           },
           {
             id_centro: 3,
@@ -29,7 +31,26 @@ export default [
             organismo: 'MES',
             created_at: '2021-07-06 21:45:51',
             updated_at: '2021-07-06 21:45:51',
+            categoria: 2,
           },
+          {
+            id_centro: 4,
+            nombre_centro: 'Some Site',
+            municipio: 'Santo Domingo',
+            organismo: 'CARACOL',
+            created_at: '2021-07-06 21:45:51',
+            updated_at: '2021-07-06 21:45:51',
+            categoria: 0,
+          },
+          {
+            id_centro: 5,
+            nombre_centro: 'Another Place',
+            municipio: 'Caibarien',
+            organismo: 'MINED',
+            created_at: '2021-07-06 21:45:51',
+            updated_at: '2021-07-06 21:45:51',
+            categoria: 0,
+          }
         ],
         meta: {
           current_page: 1,
@@ -111,6 +132,52 @@ export default [
       }),
     )
   }),
+  rest.get(REQUEST_DIR + 'nomenclador/clasificacion', (req, res, ctx) => {
+    return res(
+      ctx.json([
+          {
+            id: 1,
+            nombre: 'ALTO RIESGO',
+          },
+          {
+            id: 2,
+            nombre: 'RIESGO MEDIO',
+          },
+          {
+            id: 3,
+            nombre: 'RIESGO BAJO',
+          },
+          {
+            id: 0,
+            nombre: 'SOSPECHOSO',
+          },
+        ],
+      ),
+    )
+  }),
+  rest.get(REQUEST_DIR + 'nomenclador/categoria', (req, res, ctx) => {
+    return res(
+      ctx.json([
+          {
+            id: 1,
+            nombre: 'ALTO RIESGO',
+          },
+          {
+            id: 2,
+            nombre: 'RIESGO MEDIO',
+          },
+          {
+            id: 3,
+            nombre: 'RIESGO BAJO',
+          },
+          {
+            id: 0,
+            nombre: 'SOSPECHOSO',
+          },
+        ],
+      ),
+    )
+  }),
   rest.post(REQUEST_DIR + 'centros/1/areas', (req, res, ctx) => {
     return res(
       ctx.json({
@@ -165,18 +232,28 @@ export default [
             ci: 92121234063,
             nombre: 'Pepe',
             apellidos: 'Glez Hdez',
+            categoria: 3,
           },
           {
-            id_paciente: '1',
+            id_paciente: '2',
             ci: 92121234063,
             nombre: 'Pepe',
             apellidos: 'Glez Hdez',
+            categoria: 2,
           },
           {
-            id_paciente: '1',
+            id_paciente: '3',
             ci: 92121234063,
             nombre: 'Pepe',
             apellidos: 'Glez Hdez',
+            categoria: 2,
+          },
+          {
+            id_paciente: '4',
+            ci: 92121234063,
+            nombre: 'Amancio',
+            apellidos: 'Perez Perez',
+            categoria: 0,
           },
         ],
         meta: {
@@ -269,26 +346,25 @@ export default [
           cmf: '20.31',
           remite_caso: 'Policlinico',
           hospital: null,
-          estado_salud: 1,
+          estado_salud: 'De cuidado',
           provincia: 1,
           municipio: 1,
-          categoria: 1,
-          area_salud: 1,
-          estado_sistema: '1',
-          trabajador_salud: false,
-          embarazada: false,
-          ninho: false,
+          categoria: 'Loco',
+          estado_sistema: 'Negativo_PCR',
+          trabajador_salud: 0,
+          embarazada: 0,
+          ninho: 0,
           test_antigeno: 'Negativo',
-          vacunado: true,
+          vacunado: 1,
           apps: {
             id_app: 1,
             id_paciente: 1,
-            hipertension: false,
-            diabetes: false,
-            asma: false,
-            obesidad: false,
-            insuficiencia_renal: false,
-            oncologia: false,
+            hipertension: 0,
+            diabetes: 0,
+            asma: 1,
+            obesidad: 0,
+            insuficiencia_renal: 0,
+            oncologia: 0,
             otros: '',
             created_at: '2021-07-15 20:12:20',
             updated_at: '2021-07-15 20:12:20',
@@ -297,14 +373,14 @@ export default [
             id_sintomas: 1,
             id_paciente: 1,
             fecha_sintomas: null,
-            fiebre: false,
-            rinorrea: false,
-            congestion_nasal: false,
-            tos: false,
-            expectoracion: false,
-            dificultad_respiratoria: false,
-            cefalea: false,
-            dolor_garganta: false,
+            fiebre: 0,
+            rinorrea: 1,
+            congestion_nasal: 0,
+            tos: 0,
+            expectoracion: 0,
+            dificultad_respiratoria: 0,
+            cefalea: 0,
+            dolor_garganta: 0,
             otros: '',
             created_at: '2021-07-15 20:12:20',
             updated_at: '2021-07-15 20:12:20',
@@ -427,132 +503,6 @@ export default [
         {
           id: 3,
           nombre: 'No realizado',
-        },
-      ]),
-    ),
-  ),
-  rest.get(REQUEST_DIR + 'nomenclador/provincia', (req, res, ctx) =>
-    res(
-      ctx.json([
-        {
-          id: 1,
-          nombre: 'HABANA',
-        },
-        {
-          id: 2,
-          nombre: 'MATANZAS',
-        },
-        {
-          id: 3,
-          nombre: 'VILLA CLARA',
-        },
-      ]),
-    ),
-  ),
-  rest.get(REQUEST_DIR + 'nomenclador/clasificacion', (req, res, ctx) =>
-    res(
-      ctx.json([
-        {
-          id: 1,
-          nombre: 'ALTO RIESGO',
-        },
-        {
-          id: 2,
-          nombre: 'MEDIANO RIESGO',
-        },
-        {
-          id: 3,
-          nombre: 'BAJO RIESGO',
-        },
-      ]),
-    ),
-  ),
-  rest.get(REQUEST_DIR + 'nomenclador/sistema', (req, res, ctx) =>
-    res(
-      ctx.json([
-        {
-          id: 1,
-          nombre: 'ENCUESTADO',
-        },
-        {
-          id: 2,
-          nombre: 'PENDIENTE INGRESO',
-        },
-        {
-          id: 3,
-          nombre: 'INGRESADO',
-        },
-      ]),
-    ),
-  ),
-  rest.get(REQUEST_DIR + 'nomenclador/estado', (req, res, ctx) =>
-    res(
-      ctx.json([
-        {
-          id: 1,
-          nombre: 'DE CUIDADO',
-        },
-        {
-          id: 2,
-          nombre: 'GRAVE',
-        },
-        {
-          id: 3,
-          nombre: 'ETC',
-        },
-      ]),
-    ),
-  ),
-  rest.get(REQUEST_DIR + 'nomenclador/categoria', (req, res, ctx) =>
-    res(
-      ctx.json([
-        {
-          id: 1,
-          nombre: 'SOSPECHOSO',
-        },
-        {
-          id: 2,
-          nombre: 'POSITIVO',
-        },
-        {
-          id: 3,
-          nombre: 'CONTACTO',
-        },
-      ]),
-    ),
-  ),
-  rest.get(REQUEST_DIR + 'nomenclador/municipio/1', (req, res, ctx) =>
-    res(
-      ctx.json([
-        {
-          id: 1,
-          nombre: 'Santa Clara',
-        },
-        {
-          id: 2,
-          nombre: 'Maniv=caragua',
-        },
-        {
-          id: 3,
-          nombre: 'Santo Domingo',
-        },
-      ]),
-    ),
-  ),
-  rest.get(REQUEST_DIR + 'nomenclador/salud/1', (req, res, ctx) =>
-    res(
-      ctx.json([
-        {
-          id: 1,
-          nombre: 'Santa Clara',
-        },
-        {
-          id: 2,
-          nombre: 'XX Aniversario',
-        },
-        {
-          id: 3,
-          nombre: 'Maleza',
         },
       ]),
     ),

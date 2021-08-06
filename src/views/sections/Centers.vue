@@ -1,3 +1,4 @@
+/* eslint-disable */
 <template>
   <div style="padding: 8px">
     <div
@@ -687,8 +688,8 @@
 
 <script>
   import InfoBox from '@/components/InfoBox.vue'
-  import { getCenters, getCenter, postCenter, putCenter, deleteCenter } from '@/axios/centers'
-  import { getAreas, getArea, postArea, putArea, deleteArea } from '@/axios/areas'
+  import { getCenters, postCenter, putCenter, deleteCenter } from '@/axios/centers'
+  import { getAreas, postArea, putArea, deleteArea } from '@/axios/areas'
   import { getMunicipalities, getProvinces } from '@/axios/nomenclators'
   export default {
     components: { InfoBox },

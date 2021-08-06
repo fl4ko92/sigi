@@ -1,10 +1,10 @@
 import { AGENT } from '@/utils/constants'
+import { decrypt } from '../utils/enc'
 
-export function requestData (filters) {
+export function requestData () {
   return {
-    params: filters,
     headers: {
-      // Authorization: 'Bearer ' + decrypt(localStorage.getItem('tkn')),
+      Authorization: 'Bearer ' + decrypt(localStorage.getItem('tkn')),
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
@@ -14,11 +14,10 @@ export function requestData (filters) {
   }
 }
 
-export function requestDataFormUrlEncoded (filters) {
+export function requestDataFormUrlEncoded () {
   return {
-    params: filters,
     headers: {
-      // Authorization: 'Bearer ' + decrypt(localStorage.getItem('tkn')),
+      Authorization: 'Bearer ' + decrypt(localStorage.getItem('tkn')),
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },

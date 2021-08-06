@@ -37,19 +37,27 @@ const router = new Router({
           component: () => import('@/views/home/Index.vue'),
         },
         {
+          path: 'enter_patients',
+          name: 'IngresarPacientes',
+          component: () => import('@/views/patients/IngresarPacientes.vue'),
+        },
+        {
           path: 'centers',
           name: 'Centros',
           component: () => import('@/views/about/Index.vue'),
+          meta: { src: require('@/assets/about.jpg') },
         },
         {
           path: 'patients',
           name: 'Pacientes',
           component: () => import('@/views/contact-us/Index.vue'),
+          meta: { src: require('@/assets/contact.jpg') },
         },
         {
           path: 'pro',
           name: 'Directores',
           component: () => import('@/views/pro/Index.vue'),
+          meta: { src: require('@/assets/pro.jpg') },
         },
         {
           path: '*',

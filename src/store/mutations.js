@@ -12,22 +12,4 @@ export default {
   setMunicipalities (state, data) {
     state.municipalities = data
   },
-  setCategories (state, data) {
-    state.categories = data
-  },
-  setCenters (state, data) {
-    state.centers = data
-  },
-  setClasifications (state, data) {
-    state.clasifications = data
-  },
-  setAntigens (state, data) {
-    state.antigens = data
-  },
-  setHealthAreas (state, data) {
-    state.healthAreas = data
-  },
-  setHealthStatuses (state, data) {
-    state.healthStatuses = data
-  },
 }

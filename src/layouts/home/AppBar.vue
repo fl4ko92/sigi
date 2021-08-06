@@ -8,10 +8,37 @@
       height="80"
     >
       <v-spacer />
+
+      <!-- <div>
+        <v-tabs
+          class="hidden-sm-and-down"
+          optional
+        >
+          <v-tab
+            v-for="(name, i) in items"
+            :key="i"
+            :to="{ name }"
+            :exact="name === 'Home'"
+            :ripple="false"
+            active-class="text--primary"
+            class="font-weight-bold"
+            min-width="96"
+            text
+          >
+            {{ name }}
+          </v-tab>
+        </v-tabs>
+      </div> -->
+
       <v-app-bar-nav-icon
         @click="showHideDrawer"
       />
     </v-app-bar>
+
+    <!-- <home-drawer
+      v-model="drawer"
+      :items="items"
+    /> -->
   </div>
 </template>
 
@@ -19,7 +46,12 @@
   export default {
     name: 'HomeAppBar',
 
+    /* components: {
+      HomeDrawer: () => import('./Drawer'),
+    }, */
+
     data: () => ({
+      drawer: null,
       items: [
         'Home',
         'About',
